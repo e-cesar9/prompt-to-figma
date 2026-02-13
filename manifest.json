@@ -1,0 +1,15 @@
+{
+  "name": "DesignAI - System + Screens + Code",
+  "id": "designai",
+  "api": "1.0.0",
+  "main": "dist/code.js",
+  "ui": "dist/ui.html",
+  "editorType": ["figma", "figjam"],
+  "networkAccess": {
+    "allowedDomains": [
+      "https://api.anthropic.com"
+    ]
+  },
+  "permissions": ["activeusers"],
+  "documentAccess": "dynamic-page"
+}

@@ -1,0 +1,29 @@
+{
+  "name": "figma-designai",
+  "version": "1.0.0",
+  "description": "AI-powered design system generator, screen creator, and code exporter for Figma",
+  "main": "dist/code.js",
+  "scripts": {
+    "build": "npm run build:ui && npm run build:code",
+    "build:ui": "esbuild src/ui.tsx --bundle --outfile=dist/ui.js",
+    "build:code": "esbuild src/code.ts --bundle --outfile=dist/code.js --platform=node --external:@figma",
+    "watch": "concurrently \"npm run build:ui -- --watch\" \"npm run build:code -- --watch\"",
+    "dev": "npm run watch"
+  },
+  "keywords": ["figma", "plugin", "ai", "design-system", "code-generation"],
+  "author": "Rico",
+  "license": "MIT",
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.90.0",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.48",
+    "concurrently": "^8.2.2",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.17.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
