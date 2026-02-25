@@ -1,53 +1,105 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import './ui.css';
 
 function App() {
-  const [activeTab, setActiveTab] = useState<'system' | 'screen' | 'code'>('system');
+  const [activeTab, setActiveTab] = useState<'system' | 'screen' | 'code' | 'settings'>('system');
+  const [apiKey, setApiKey] = useState('');
+  const [aiProvider, setAiProvider] = useState<'anthropic' | 'openai'>('anthropic');
   const [brief, setBrief] = useState('');
   const [screenPrompt, setScreenPrompt] = useState('');
   const [codeFormat, setCodeFormat] = useState<'react' | 'vue' | 'html'>('react');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState<'success' | 'error' | 'info'>('info');
   const [generatedCode, setGeneratedCode] = useState('');
 
+  // Load saved API key on mount
+  useEffect(() => {
+    const savedKey = localStorage.getItem('designai_api_key') || '';
+    const savedProvider = (localStorage.getItem('designai_provider') as 'anthropic' | 'openai') || 'anthropic';
+    setApiKey(savedKey);
+    setAiProvider(savedProvider);
+  }, []);
+
   // Listen to messages from plugin backend
-  React.useEffect(() => {
+  useEffect(() => {
     window.onmessage = (event) => {
       const msg = event.data.pluginMessage;
+      if (!msg) return;
 
       if (msg.type === 'loading') {
         setLoading(true);
         setMessage(msg.message);
+        setMessageType('info');
       } else if (msg.type === 'success') {
         setLoading(false);
         setMessage(msg.message);
+        setMessageType('success');
         setTimeout(() => setMessage(''), 3000);
       } else if (msg.type === 'error') {
         setLoading(false);
-        setMessage(`Error: ${msg.message}`);
+        setMessage(`${msg.message}`);
+        setMessageType('error');
       } else if (msg.type === 'code-generated') {
         setLoading(false);
         setGeneratedCode(msg.code);
         setMessage('Code generated! ✨');
+        setMessageType('success');
       }
     };
   }, []);
 
+  const saveApiKey = () => {
+    localStorage.setItem('designai_api_key', apiKey);
+    localStorage.setItem('designai_provider', aiProvider);
+    setMessage('API key saved! 🔐');
+    setMessageType('success');
+    setTimeout(() => setMessage(''), 2000);
+  };
+
   const handleGenerateSystem = () => {
-    if (!brief.trim()) {
-      setMessage('Please enter a brief');
+    if (!apiKey.trim()) {
+      setMessage('Please add your API key in Settings first');
+      setMessageType('error');
+      setActiveTab('settings');
       return;
     }
-    parent.postMessage({ pluginMessage: { type: 'generate-system', brief } }, '*');
+    if (!brief.trim()) {
+      setMessage('Please enter a brief');
+      setMessageType('error');
+      return;
+    }
+    parent.postMessage({ 
+      pluginMessage: { 
+        type: 'generate-system', 
+        brief,
+        apiKey,
+        provider: aiProvider
+      } 
+    }, '*');
   };
 
   const handleGenerateScreen = () => {
-    if (!screenPrompt.trim()) {
-      setMessage('Please enter a screen description');
+    if (!apiKey.trim()) {
+      setMessage('Please add your API key in Settings first');
+      setMessageType('error');
+      setActiveTab('settings');
       return;
     }
-    parent.postMessage({ pluginMessage: { type: 'generate-screen', prompt: screenPrompt } }, '*');
+    if (!screenPrompt.trim()) {
+      setMessage('Please enter a screen description');
+      setMessageType('error');
+      return;
+    }
+    parent.postMessage({ 
+      pluginMessage: { 
+        type: 'generate-screen', 
+        prompt: screenPrompt,
+        apiKey,
+        provider: aiProvider
+      } 
+    }, '*');
   };
 
   const handleExportCode = () => {
@@ -57,6 +109,7 @@ function App() {
   const copyCode = () => {
     navigator.clipboard.writeText(generatedCode);
     setMessage('Code copied! 📋');
+    setMessageType('success');
     setTimeout(() => setMessage(''), 2000);
   };
 
@@ -73,24 +126,85 @@ function App() {
           className={`tab ${activeTab === 'system' ? 'active' : ''}`}
           onClick={() => setActiveTab('system')}
         >
-          🎨 Design System
+          🎨 System
         </button>
         <button
           className={`tab ${activeTab === 'screen' ? 'active' : ''}`}
           onClick={() => setActiveTab('screen')}
         >
-          📱 Generate Screen
+          📱 Screen
         </button>
         <button
           className={`tab ${activeTab === 'code' ? 'active' : ''}`}
           onClick={() => setActiveTab('code')}
         >
-          💻 Export Code
+          💻 Code
+        </button>
+        <button
+          className={`tab ${activeTab === 'settings' ? 'active' : ''}`}
+          onClick={() => setActiveTab('settings')}
+        >
+          ⚙️ Settings
         </button>
       </div>
 
       {/* Content */}
       <div className="content">
+        {activeTab === 'settings' && (
+          <div className="section">
+            <h2>⚙️ API Settings</h2>
+            <p className="description">
+              Connect your AI provider to start generating designs.
+            </p>
+
+            <div className="form-group">
+              <label className="label">AI Provider</label>
+              <div className="provider-selector">
+                <button
+                  className={`provider-btn ${aiProvider === 'anthropic' ? 'active' : ''}`}
+                  onClick={() => setAiProvider('anthropic')}
+                >
+                  🧠 Claude (Anthropic)
+                </button>
+                <button
+                  className={`provider-btn ${aiProvider === 'openai' ? 'active' : ''}`}
+                  onClick={() => setAiProvider('openai')}
+                >
+                  🤖 GPT-4 (OpenAI)
+                </button>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="label">
+                {aiProvider === 'anthropic' ? 'Anthropic API Key' : 'OpenAI API Key'}
+              </label>
+              <input
+                type="password"
+                className="input"
+                placeholder={aiProvider === 'anthropic' ? 'sk-ant-...' : 'sk-...'}
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+              />
+              <p className="help-text">
+                {aiProvider === 'anthropic' 
+                  ? 'Get your key at console.anthropic.com'
+                  : 'Get your key at platform.openai.com'}
+              </p>
+            </div>
+
+            <button className="button primary" onClick={saveApiKey}>
+              💾 Save Settings
+            </button>
+
+            {apiKey && (
+              <div className="status-badge success">
+                ✓ API key configured
+              </div>
+            )}
+          </div>
+        )}
+
         {activeTab === 'system' && (
           <div className="section">
             <h2>Generate Design System</h2>
@@ -101,7 +215,7 @@ function App() {
 
             <textarea
               className="textarea"
-              placeholder="Example: Modern fintech app, trustworthy and professional, target millennials"
+              placeholder="Example: Modern fintech app, trustworthy and professional, target millennials, blue and green colors preferred"
               value={brief}
               onChange={(e) => setBrief(e.target.value)}
               rows={6}
@@ -113,26 +227,32 @@ function App() {
             </button>
 
             <div className="examples">
-              <p className="examples-title">Examples:</p>
+              <p className="examples-title">Quick examples:</p>
               <button
                 className="example-chip"
                 onClick={() =>
-                  setBrief('Modern e-commerce platform, vibrant and energetic, Gen Z audience')
+                  setBrief('Modern e-commerce platform, vibrant and energetic, Gen Z audience, bold typography')
                 }
               >
                 E-commerce
               </button>
               <button
                 className="example-chip"
-                onClick={() => setBrief('Healthcare app, calm and reassuring, elderly users')}
+                onClick={() => setBrief('Healthcare app, calm and reassuring, elderly users, accessible design')}
               >
                 Healthcare
               </button>
               <button
                 className="example-chip"
-                onClick={() => setBrief('Gaming dashboard, dark mode, neon accents, competitive')}
+                onClick={() => setBrief('Gaming dashboard, dark mode, neon accents, competitive, futuristic')}
               >
                 Gaming
+              </button>
+              <button
+                className="example-chip"
+                onClick={() => setBrief('SaaS B2B platform, professional, clean, minimalist, productivity focused')}
+              >
+                SaaS
               </button>
             </div>
           </div>
@@ -147,7 +267,7 @@ function App() {
 
             <textarea
               className="textarea"
-              placeholder="Example: Create a login screen with email, password fields, and a sign-in button"
+              placeholder="Example: Create a login screen with email, password fields, forgot password link, and a sign-in button with social auth options"
               value={screenPrompt}
               onChange={(e) => setScreenPrompt(e.target.value)}
               rows={6}
@@ -159,26 +279,32 @@ function App() {
             </button>
 
             <div className="examples">
-              <p className="examples-title">Examples:</p>
+              <p className="examples-title">Quick examples:</p>
               <button
                 className="example-chip"
-                onClick={() => setScreenPrompt('Login screen with social auth buttons')}
+                onClick={() => setScreenPrompt('Login screen with email, password, social auth buttons, and forgot password link')}
               >
                 Login
               </button>
               <button
                 className="example-chip"
                 onClick={() =>
-                  setScreenPrompt('Dashboard with stats cards, chart, and activity feed')
+                  setScreenPrompt('Dashboard with 4 stats cards at top, main chart in center, recent activity list on the right')
                 }
               >
                 Dashboard
               </button>
               <button
                 className="example-chip"
-                onClick={() => setScreenPrompt('Profile settings screen with avatar and form')}
+                onClick={() => setScreenPrompt('User profile settings with avatar upload, name/email form, notification toggles')}
               >
                 Settings
+              </button>
+              <button
+                className="example-chip"
+                onClick={() => setScreenPrompt('Product listing page with search bar, filter sidebar, grid of product cards with images')}
+              >
+                Products
               </button>
             </div>
           </div>
@@ -246,12 +372,16 @@ function App() {
       </div>
 
       {/* Status Message */}
-      {message && <div className="message">{message}</div>}
+      {message && (
+        <div className={`message ${messageType}`}>
+          {message}
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="footer">
         <p className="footer-text">
-          Made with ❤️ by Rico • <span className="badge">Free MVP</span>
+          Made with ❤️ by Rico • <span className="badge">v1.1</span>
         </p>
       </footer>
     </div>

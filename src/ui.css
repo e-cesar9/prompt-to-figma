@@ -47,10 +47,10 @@ body {
 
 .tab {
   flex: 1;
-  padding: 12px 8px;
+  padding: 12px 6px;
   border: none;
   background: transparent;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   color: #666;
   cursor: pointer;
@@ -87,6 +87,96 @@ body {
   color: #666;
   margin-bottom: 16px;
   line-height: 1.6;
+}
+
+/* Form Elements */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.help-text {
+  font-size: 11px;
+  color: #888;
+  margin-top: 6px;
+}
+
+/* Provider Selector */
+.provider-selector {
+  display: flex;
+  gap: 8px;
+}
+
+.provider-btn {
+  flex: 1;
+  padding: 12px 8px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  font-size: 12px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.provider-btn:hover {
+  border-color: #667eea;
+  background: #f5f5ff;
+}
+
+.provider-btn.active {
+  border-color: #667eea;
+  background: #667eea;
+  color: white;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 12px;
+}
+
+.status-badge.success {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-badge.error {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.status-badge.warning {
+  background: #fff3e0;
+  color: #ef6c00;
 }
 
 /* Textarea */
@@ -274,6 +364,20 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   animation: fadeIn 0.3s;
   z-index: 100;
+  max-width: 90%;
+  text-align: center;
+}
+
+.message.success {
+  background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
+}
+
+.message.error {
+  background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+}
+
+.message.info {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 @keyframes fadeIn {
@@ -303,7 +407,7 @@ body {
 .badge {
   display: inline-block;
   padding: 2px 8px;
-  background: #4caf50;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border-radius: 12px;
   font-size: 10px;
