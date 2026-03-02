@@ -1,6 +1,6 @@
 {
-  "name": "Tokn - Design Systems, Generated",
-  "id": "tokn",
+  "name": "Prompt to Design, to Code",
+  "id": "prompt-to-design-to-code",
   "api": "1.0.0",
   "main": "dist/code.js",
   "ui": "dist/ui.html",
