@@ -409,6 +409,9 @@ function App() {
       {/* Status Message */}
       {message && (
         <div className={`message ${messageType}`}>
+          {loading && progressTotal === 0 && (
+            <div className="spinner"></div>
+          )}
           <div className="message-text">{message}</div>
           {progressTotal > 0 && (
             <div className="progress-container">
