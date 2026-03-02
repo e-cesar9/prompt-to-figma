@@ -1616,8 +1616,124 @@ Return ONLY valid JSON (no markdown, no explanation):
   return result;
 }
 
-// Export to code with AI-powered semantic detection + streaming
-async function exportToCode(format: 'react' | 'vue' | 'html', apiKey: string, provider: 'anthropic' | 'openai' | 'deepseek') {
+// ========================================
+// FALLBACK MODE: Simple code generation (no AI)
+// ========================================
+
+// Simple JSX generation (all divs, inline styles)
+function nodeToJSX(node: SceneNode, indent: string = '      '): string {
+  if (node.type === 'TEXT') {
+    const textNode = node as TextNode;
+    const styles: string[] = [];
+    styles.push(`fontSize: ${Math.round(textNode.fontSize as number)}px`);
+    
+    if (textNode.fills && Array.isArray(textNode.fills) && textNode.fills.length > 0) {
+      const fill = textNode.fills[0] as SolidPaint;
+      if (fill.type === 'SOLID') {
+        const r = Math.round(fill.color.r * 255);
+        const g = Math.round(fill.color.g * 255);
+        const b = Math.round(fill.color.b * 255);
+        styles.push(`color: 'rgb(${r}, ${g}, ${b})'`);
+      }
+    }
+    
+    return `${indent}<div style={{ ${styles.join(', ')} }}>${textNode.characters}</div>`;
+  }
+  
+  if (node.type === 'FRAME' || node.type === 'RECTANGLE' || node.type === 'COMPONENT' || node.type === 'INSTANCE') {
+    const container = node as FrameNode;
+    const styles: string[] = [];
+    
+    styles.push(`width: ${Math.round(container.width)}px`);
+    styles.push(`height: ${Math.round(container.height)}px`);
+    
+    if (container.x !== undefined && container.y !== undefined && container.parent && container.parent.type !== 'PAGE') {
+      styles.push(`position: 'absolute'`);
+      styles.push(`left: ${Math.round(container.x)}px`);
+      styles.push(`top: ${Math.round(container.y)}px`);
+    }
+    
+    if (container.fills && Array.isArray(container.fills) && container.fills.length > 0) {
+      const fill = container.fills[0] as SolidPaint;
+      if (fill.type === 'SOLID') {
+        const r = Math.round(fill.color.r * 255);
+        const g = Math.round(fill.color.g * 255);
+        const b = Math.round(fill.color.b * 255);
+        styles.push(`backgroundColor: 'rgb(${r}, ${g}, ${b})'`);
+      }
+    }
+    
+    if ('cornerRadius' in container && container.cornerRadius && typeof container.cornerRadius === 'number') {
+      styles.push(`borderRadius: ${container.cornerRadius}px`);
+    }
+    
+    let children = '';
+    if ('children' in container && container.children) {
+      children = container.children
+        .map((child) => nodeToJSX(child, indent + '  '))
+        .join('\n');
+    }
+    
+    if (children) {
+      return `${indent}<div style={{ ${styles.join(', ')} }}>\n${children}\n${indent}</div>`;
+    } else {
+      return `${indent}<div style={{ ${styles.join(', ')} }} />`;
+    }
+  }
+  
+  return `${indent}{/* ${node.type} not supported */}`;
+}
+
+function generateReactCode(node: SceneNode): string {
+  const name = node.name.replace(/[^a-zA-Z0-9]/g, '') || 'Component';
+  const jsx = nodeToJSX(node);
+  return `import React from 'react';\n\nexport function ${name}() {\n  return (\n${jsx}\n  );\n}\n\nexport default ${name};`;
+}
+
+function nodeToHTML(node: SceneNode, indent: string = '  '): string {
+  if (node.type === 'TEXT') {
+    const textNode = node as TextNode;
+    return `${indent}<div class="text">${textNode.characters}</div>`;
+  }
+  
+  if (node.type === 'FRAME' || node.type === 'RECTANGLE' || node.type === 'COMPONENT' || node.type === 'INSTANCE') {
+    const container = node as FrameNode;
+    const className = node.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'element';
+    
+    let children = '';
+    if ('children' in container && container.children) {
+      children = container.children
+        .map((child) => nodeToHTML(child, indent + '  '))
+        .join('\n');
+    }
+    
+    if (children) {
+      return `${indent}<div class="${className}">\n${children}\n${indent}</div>`;
+    } else {
+      return `${indent}<div class="${className}"></div>`;
+    }
+  }
+  
+  return `${indent}<!-- ${node.type} not supported -->`;
+}
+
+function generateVueCode(node: SceneNode): string {
+  const name = node.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'component';
+  const html = nodeToHTML(node);
+  return `<template>\n${html}\n</template>\n\n<script setup lang="ts">\n// Component logic here\n</script>\n\n<style scoped>\n/* Add your styles here */\n</style>`;
+}
+
+function generateHTMLCode(node: SceneNode): string {
+  const name = node.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'component';
+  const html = nodeToHTML(node, '  ');
+  return `<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>${node.name}</title>\n  <style>\n    /* Add your styles here */\n  </style>\n</head>\n<body>\n${html}\n</body>\n</html>`;
+}
+
+// ========================================
+// EXPORT TO CODE: Smart mode detection
+// ========================================
+
+async function exportToCode(format: 'react' | 'vue' | 'html') {
   const selection = figma.currentPage.selection;
 
   if (selection.length === 0) {
@@ -1628,32 +1744,49 @@ async function exportToCode(format: 'react' | 'vue' | 'html', apiKey: string, pr
   const node = selection[0];
 
   try {
-    figma.ui.postMessage({ type: 'code-stream-start', format });
-    figma.ui.postMessage({ type: 'code-chunk', chunk: '// Analyzing design...\n' });
+    // Load API key from storage
+    const apiKey = await figma.clientStorage.getAsync('designai_api_key') || '';
+    const provider = (await figma.clientStorage.getAsync('designai_provider') || 'anthropic') as 'anthropic' | 'openai' | 'deepseek';
 
-    // Get semantic tags from AI
-    const semanticMap = await getSemanticTags(node, apiKey, provider);
+    // AI MODE 🧠 (if API key configured)
+    if (apiKey && apiKey.trim()) {
+      figma.ui.postMessage({ type: 'code-stream-start', format });
+      figma.ui.postMessage({ type: 'code-chunk', chunk: '// 🧠 Analyzing design with AI...\n' });
 
-    figma.ui.postMessage({ type: 'code-chunk', chunk: '// Generating code...\n\n' });
+      const semanticMap = await getSemanticTags(node, apiKey, provider);
 
-    let code = '';
+      figma.ui.postMessage({ type: 'code-chunk', chunk: '// ✨ Generating semantic code...\n\n' });
 
-    if (format === 'react') {
-      code = generateReactCodeWithSemantics(node, semanticMap);
-    } else if (format === 'vue') {
-      code = generateVueCodeWithSemantics(node, semanticMap);
-    } else {
-      code = generateHTMLCodeWithSemantics(node, semanticMap);
+      let code = '';
+      if (format === 'react') {
+        code = generateReactCodeWithSemantics(node, semanticMap);
+      } else if (format === 'vue') {
+        code = generateVueCodeWithSemantics(node, semanticMap);
+      } else {
+        code = generateHTMLCodeWithSemantics(node, semanticMap);
+      }
+
+      const lines = code.split('\n');
+      for (const line of lines) {
+        figma.ui.postMessage({ type: 'code-chunk', chunk: line + '\n' });
+        await delay(20);
+      }
+
+      figma.ui.postMessage({ type: 'code-stream-end' });
+    } 
+    // FALLBACK MODE ⚡ (no API key)
+    else {
+      let code = '';
+      if (format === 'react') {
+        code = generateReactCode(node);
+      } else if (format === 'vue') {
+        code = generateVueCode(node);
+      } else {
+        code = generateHTMLCode(node);
+      }
+
+      figma.ui.postMessage({ type: 'code-generated', code, format });
     }
-
-    // Stream code line by line
-    const lines = code.split('\n');
-    for (const line of lines) {
-      figma.ui.postMessage({ type: 'code-chunk', chunk: line + '\n' });
-      await delay(20); // Small delay for streaming effect
-    }
-
-    figma.ui.postMessage({ type: 'code-stream-end' });
   } catch (error: any) {
     figma.ui.postMessage({ type: 'error', message: error.message });
   }
@@ -1877,7 +2010,7 @@ figma.ui.onmessage = async (msg) => {
   } else if (msg.type === 'generate-screen') {
     await generateScreen(msg.prompt, msg.apiKey, msg.provider || 'anthropic');
   } else if (msg.type === 'export-code') {
-    await exportToCode(msg.format, msg.apiKey, msg.provider || 'anthropic');
+    await exportToCode(msg.format);
   } else if (msg.type === 'cancel') {
     figma.closePlugin();
   }

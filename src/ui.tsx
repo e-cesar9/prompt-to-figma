@@ -138,18 +138,10 @@ function App() {
   };
 
   const handleExportCode = () => {
-    if (!apiKey.trim()) {
-      setMessage('Please add your API key in Settings first');
-      setMessageType('error');
-      setActiveTab('settings');
-      return;
-    }
     parent.postMessage({ 
       pluginMessage: { 
         type: 'export-code', 
-        format: codeFormat,
-        apiKey,
-        provider: aiProvider
+        format: codeFormat
       } 
     }, '*');
   };
@@ -375,6 +367,9 @@ function App() {
             <h2>Export to Code</h2>
             <p className="description">
               Select a frame in Figma, then export it to React, Vue, or HTML code.
+              {apiKey.trim() 
+                ? ' 🧠 AI semantic detection enabled (button, input, form, h1-h6, etc.)' 
+                : ' ⚡ Using fast mode (configure API key in Settings for AI semantic detection).'}
             </p>
 
             <div className="format-selector">
