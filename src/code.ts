@@ -1593,8 +1593,8 @@ async function streamGenerateAndCreate(prompt: string, apiKey: string, provider:
       throw new Error(`API error: ${response.status}`);
     }
 
-    const reader = response.body?.getReader();
-    if (!reader) throw new Error('No reader');
+    if (!response.body) throw new Error('No response body');
+    const reader = response.body.getReader();
 
     const decoder = new TextDecoder();
     
