@@ -76,11 +76,15 @@ function App() {
   const [generatedCode, setGeneratedCode] = useState('');
   const [progressStep, setProgressStep] = useState(0);
   const [progressTotal, setProgressTotal] = useState(0);
+  const [availableSystems, setAvailableSystems] = useState<Array<{name: string}>>([]);
+  const [selectedSystem, setSelectedSystem] = useState('');
 
-  // Load saved API key on mount
+  // Load saved API key and design systems on mount
   useEffect(() => {
     // Request saved settings from plugin backend
     parent.postMessage({ pluginMessage: { type: 'get-settings' } }, '*');
+    // Request available design systems
+    parent.postMessage({ pluginMessage: { type: 'get-design-systems' } }, '*');
   }, []);
 
   // Listen to messages from plugin backend
@@ -93,6 +97,9 @@ function App() {
         // Received saved settings
         setApiKey(msg.apiKey || '');
         setAiProvider(msg.provider || 'anthropic');
+      } else if (msg.type === 'design-systems') {
+        // Received available design systems
+        setAvailableSystems(msg.systems || []);
       } else if (msg.type === 'progress') {
         // Progressive creation updates
         console.log('🔥 PROGRESS:', msg.message, `${msg.step}/${msg.total}`);
@@ -194,7 +201,8 @@ function App() {
         type: 'generate-screen', 
         prompt: screenPrompt,
         apiKey,
-        provider: aiProvider
+        provider: aiProvider,
+        designSystem: selectedSystem || null
       } 
     }, '*');
   };
@@ -387,6 +395,22 @@ function App() {
             <p className="description">
               Describe the screen you want and AI will create the full layout with components.
             </p>
+
+            <div className="form-group">
+              <label className="label">Design System (optional)</label>
+              <select 
+                className="select" 
+                value={selectedSystem} 
+                onChange={(e) => setSelectedSystem(e.target.value)}
+                disabled={loading}
+              >
+                <option value="">None (default colors)</option>
+                {availableSystems.map(sys => (
+                  <option key={sys.name} value={sys.name}>{sys.name}</option>
+                ))}
+              </select>
+              <p className="hint">Choose a design system to use its colors, typography, and spacing</p>
+            </div>
 
             <textarea
               className="textarea"

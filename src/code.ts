@@ -1560,11 +1560,30 @@ async function createIconsSection(tokens: DesignTokens): Promise<FrameNode> {
 }
 
 // Generate screen from text
-async function generateScreen(prompt: string, apiKey: string, provider: 'anthropic' | 'openai') {
+async function generateScreen(prompt: string, apiKey: string, provider: 'anthropic' | 'openai', designSystemName?: string | null) {
   figma.ui.postMessage({ type: 'loading', message: 'Generating screen layout...' });
 
   try {
-    const aiPrompt = `Generate a detailed mobile app screen layout for: "${prompt}"
+    // Extract design tokens if a design system is selected
+    let designSystemContext = '';
+    if (designSystemName) {
+      const tokens = extractDesignTokens(designSystemName);
+      if (tokens) {
+        designSystemContext = `
+USE THIS DESIGN SYSTEM:
+- Primary color: ${tokens.colors.primary['500'] || '#3B82F6'}
+- Secondary color: ${tokens.colors.secondary['500'] || '#8B5CF6'}
+- Neutral color: ${tokens.colors.neutral['500'] || '#6B7280'}
+- Background: ${tokens.darkMode?.background || '#FFFFFF'}
+- Font family: ${tokens.typography.fontFamily || 'Inter'}
+- Border radius: 8px
+
+Apply these colors and styles to all elements in the screen.
+`;
+      }
+    }
+
+    const aiPrompt = `${designSystemContext}Generate a detailed mobile app screen layout for: "${prompt}"
 
 IMPORTANT RULES:
 1. Every button MUST have text inside it (create a separate TEXT element for button labels)
@@ -2223,12 +2242,93 @@ ${html}
 }
 
 // Message handlers
+// ========================================
+// GET AVAILABLE DESIGN SYSTEMS
+// ========================================
+
+function getAvailableDesignSystems(): Array<{name: string}> {
+  const systems: Array<{name: string}> = [];
+  
+  // Scan all pages (user can choose any page as design system)
+  figma.root.children.forEach(page => {
+    // Show all pages except current page
+    if (page.id !== figma.currentPage.id) {
+      systems.push({ name: page.name });
+    }
+  });
+  
+  return systems;
+}
+
+// ========================================
+// EXTRACT TOKENS FROM DESIGN SYSTEM PAGE
+// ========================================
+
+function extractDesignTokens(pageName: string): DesignTokens | null {
+  const page = figma.root.children.find(p => p.name === pageName);
+  if (!page) return null;
+  
+  const tokens: DesignTokens = {
+    colors: {
+      primary: {},
+      secondary: {},
+      neutral: {},
+      semantic: {}
+    },
+    typography: {
+      fontFamily: 'Inter',
+      scale: []
+    },
+    spacing: [],
+    borderRadius: [],
+    shadows: [],
+    darkMode: {
+      background: '#000000',
+      surface: '#1A1A1A',
+      text: '#FFFFFF',
+      textSecondary: '#A0A0A0'
+    }
+  };
+  
+  // Scan frames in the page to extract colors
+  page.children.forEach(node => {
+    if (node.type === 'FRAME' && node.name.toLowerCase().includes('color')) {
+      // Extract colors from color palette frames
+      node.children.forEach(child => {
+        if (child.type === 'RECTANGLE' && 'fills' in child) {
+          const fills = child.fills as readonly Paint[];
+          if (fills.length > 0 && fills[0].type === 'SOLID') {
+            const color = fills[0].color;
+            const hex = rgbToHex(color.r, color.g, color.b);
+            
+            // Categorize based on name
+            const name = child.name.toLowerCase();
+            if (name.includes('primary')) {
+              tokens.colors.primary['500'] = hex;
+            } else if (name.includes('secondary')) {
+              tokens.colors.secondary['500'] = hex;
+            } else if (name.includes('neutral')) {
+              tokens.colors.neutral['500'] = hex;
+            }
+          }
+        }
+      });
+    }
+  });
+  
+  return tokens;
+}
+
 figma.ui.onmessage = async (msg) => {
   if (msg.type === 'get-settings') {
     // Load saved settings from Figma clientStorage
     const apiKey = await figma.clientStorage.getAsync('designai_api_key') || '';
     const provider = await figma.clientStorage.getAsync('designai_provider') || 'anthropic';
     figma.ui.postMessage({ type: 'settings', apiKey, provider });
+  } else if (msg.type === 'get-design-systems') {
+    // Get available design systems
+    const systems = getAvailableDesignSystems();
+    figma.ui.postMessage({ type: 'design-systems', systems });
   } else if (msg.type === 'save-settings') {
     // Save settings to Figma clientStorage
     await figma.clientStorage.setAsync('designai_api_key', msg.apiKey);
@@ -2236,7 +2336,7 @@ figma.ui.onmessage = async (msg) => {
   } else if (msg.type === 'generate-system') {
     await generateDesignSystem(msg.brief, msg.apiKey, msg.provider || 'anthropic');
   } else if (msg.type === 'generate-screen') {
-    await generateScreen(msg.prompt, msg.apiKey, msg.provider || 'anthropic');
+    await generateScreen(msg.prompt, msg.apiKey, msg.provider || 'anthropic', msg.designSystem);
   } else if (msg.type === 'export-code') {
     await exportToCode(msg.format);
   } else if (msg.type === 'cancel') {
