@@ -58,6 +58,27 @@ const Icon = ({ name, size = 16 }: { name: string; size?: number }) => {
         <path d="M2 12l10 5 10-5"/>
       </svg>
     ),
+    react: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="12" cy="12" r="1.5"/>
+        <path d="M12 8.5c3.5 0 6.5-1 6.5-2s-3-2-6.5-2-6.5 1-6.5 2 3 2 6.5 2z" fill="none" stroke="currentColor" strokeWidth="1"/>
+        <ellipse cx="12" cy="12" rx="11" ry="4" fill="none" stroke="currentColor" strokeWidth="1"/>
+        <ellipse cx="12" cy="12" rx="11" ry="4" transform="rotate(60 12 12)" fill="none" stroke="currentColor" strokeWidth="1"/>
+        <ellipse cx="12" cy="12" rx="11" ry="4" transform="rotate(120 12 12)" fill="none" stroke="currentColor" strokeWidth="1"/>
+      </svg>
+    ),
+    vue: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+        <path d="M2 3h4l6 10 6-10h4L12 21 2 3z"/>
+        <path d="M6 3l6 10 6-10h-3l-3 5-3-5H6z" fill="none" stroke="currentColor" strokeWidth="1"/>
+      </svg>
+    ),
+    html: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 3l2 18 6 2 6-2 2-18H4z"/>
+        <path d="M7 7h10l-1 9-4 1-4-1-0.3-3h2l0.1 1.5 2.2 0.7 2.2-0.7L16 11H8l-0.5-4h9"/>
+      </svg>
+    ),
   };
   
   return <span style={{ display: 'inline-flex', verticalAlign: 'middle', marginRight: '6px' }}>{icons[name] || icons.sparkles}</span>;
@@ -486,7 +507,7 @@ function App() {
                   checked={codeFormat === 'react'}
                   onChange={() => setCodeFormat('react')}
                 />
-                <span>⚛️ React</span>
+                <span><Icon name="react" size={14} />React</span>
               </label>
 
               <label className="radio-label">
@@ -497,7 +518,7 @@ function App() {
                   checked={codeFormat === 'vue'}
                   onChange={() => setCodeFormat('vue')}
                 />
-                <span>🌿 Vue</span>
+                <span><Icon name="vue" size={14} />Vue</span>
               </label>
 
               <label className="radio-label">
@@ -508,7 +529,7 @@ function App() {
                   checked={codeFormat === 'html'}
                   onChange={() => setCodeFormat('html')}
                 />
-                <span>📄 HTML</span>
+                <span><Icon name="html" size={14} />HTML</span>
               </label>
             </div>
 
