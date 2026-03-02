@@ -1437,7 +1437,7 @@ Be detailed and create a realistic screen layout with proper spacing, hierarchy,
 
 // Create screen from spec
 async function createScreenFromSpec(spec: any) {
-  figma.ui.postMessage({ type: 'progress', message: '⏳ Loading fonts...', step: 0, total: (spec.elements?.length || 0) + 1 });
+  figma.ui.postMessage({ type: 'progress', message: '⏳ Loading fonts...', step: 0, total: ((spec.elements && spec.elements.length) || 0) + 1 });
   
   await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
   await figma.loadFontAsync({ family: 'Inter', style: 'Medium' });
@@ -1452,7 +1452,7 @@ async function createScreenFromSpec(spec: any) {
   figma.currentPage.appendChild(frame);
   figma.viewport.scrollAndZoomIntoView([frame]);
   
-  const totalElements = spec.elements?.length || 0;
+  const totalElements = (spec.elements && spec.elements.length) || 0;
   let currentElement = 0;
 
   for (const element of (spec.elements || [])) {
