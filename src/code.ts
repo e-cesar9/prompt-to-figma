@@ -386,11 +386,13 @@ function delay(ms: number) {
 async function createFigmaDesignSystem(tokens: DesignTokens, brief: string) {
   figma.ui.postMessage({ type: 'progress', message: '⏳ Loading fonts...', step: 0, total: 7 });
   
-  // Load fonts first
-  await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
-  await figma.loadFontAsync({ family: 'Inter', style: 'Medium' });
-  await figma.loadFontAsync({ family: 'Inter', style: 'Semi Bold' });
-  await figma.loadFontAsync({ family: 'Inter', style: 'Bold' });
+  // Load fonts in parallel
+  await Promise.all([
+    figma.loadFontAsync({ family: 'Inter', style: 'Regular' }),
+    figma.loadFontAsync({ family: 'Inter', style: 'Medium' }),
+    figma.loadFontAsync({ family: 'Inter', style: 'Semi Bold' }),
+    figma.loadFontAsync({ family: 'Inter', style: 'Bold' })
+  ]);
 
   const page = figma.createPage();
   page.name = `🎨 Design System`;
@@ -1568,10 +1570,13 @@ async function streamGenerateAndCreate(prompt: string, apiKey: string, provider:
   
   figma.ui.postMessage({ type: 'progress', message: '⏳ Loading fonts...', step: 0, total: 1 });
   
-  await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
-  await figma.loadFontAsync({ family: 'Inter', style: 'Medium' });
-  await figma.loadFontAsync({ family: 'Inter', style: 'Semi Bold' });
-  await figma.loadFontAsync({ family: 'Inter', style: 'Bold' });
+  // Load all fonts in parallel for speed
+  await Promise.all([
+    figma.loadFontAsync({ family: 'Inter', style: 'Regular' }),
+    figma.loadFontAsync({ family: 'Inter', style: 'Medium' }),
+    figma.loadFontAsync({ family: 'Inter', style: 'Semi Bold' }),
+    figma.loadFontAsync({ family: 'Inter', style: 'Bold' })
+  ]);
 
   if (provider === 'anthropic') {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -1856,10 +1861,13 @@ Create a complete, realistic screen with ALL necessary text elements. Every inte
 async function createScreenFromSpec(spec: any) {
   figma.ui.postMessage({ type: 'progress', message: '⏳ Loading fonts...', step: 0, total: ((spec.elements && spec.elements.length) || 0) + 1 });
   
-  await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
-  await figma.loadFontAsync({ family: 'Inter', style: 'Medium' });
-  await figma.loadFontAsync({ family: 'Inter', style: 'Semi Bold' });
-  await figma.loadFontAsync({ family: 'Inter', style: 'Bold' });
+  // Load fonts in parallel
+  await Promise.all([
+    figma.loadFontAsync({ family: 'Inter', style: 'Regular' }),
+    figma.loadFontAsync({ family: 'Inter', style: 'Medium' }),
+    figma.loadFontAsync({ family: 'Inter', style: 'Semi Bold' }),
+    figma.loadFontAsync({ family: 'Inter', style: 'Bold' })
+  ]);
 
   const frame = figma.createFrame();
   frame.name = spec.screenName || 'Generated Screen';
