@@ -261,13 +261,13 @@ function App() {
           <div className="section">
             <h2>Generate Design System</h2>
             <p className="description">
-              Describe your project and AI will create a complete design system with colors,
-              typography, spacing, and components.
+              Describe your project and AI will create a complete, WCAG AA compliant design system with colors,
+              typography, spacing, and components. Be specific about industry, audience, and brand personality.
             </p>
 
             <textarea
               className="textarea"
-              placeholder="Example: Modern fintech app, trustworthy and professional, target millennials, blue and green colors preferred"
+              placeholder="Example: Modern fintech app for millennials. Trustworthy and professional feel. Use Inter font. Primary color blue (#0066CC preferred), secondary green. Clean, minimalist aesthetic. WCAG AA compliant."
               value={brief}
               onChange={(e) => setBrief(e.target.value)}
               rows={6}
@@ -279,30 +279,30 @@ function App() {
             </button>
 
             <div className="examples">
-              <p className="examples-title">Quick examples:</p>
+              <p className="examples-title">💡 Pro examples (detailed prompts = better results):</p>
               <button
                 className="example-chip"
                 onClick={() =>
-                  setBrief('Modern e-commerce platform, vibrant and energetic, Gen Z audience, bold typography')
+                  setBrief('Modern e-commerce platform for Gen Z. Vibrant, energetic, playful. Use Poppins font. Primary coral pink (#FF6B6B), secondary yellow (#FFD93D). Bold typography, rounded corners. Instagram-inspired aesthetic. High contrast for accessibility.')
                 }
               >
                 E-commerce
               </button>
               <button
                 className="example-chip"
-                onClick={() => setBrief('Healthcare app, calm and reassuring, elderly users, accessible design')}
+                onClick={() => setBrief('Healthcare telemedicine app for elderly users (65+). Calm, reassuring, trustworthy. Use Inter font with minimum 16px body text. Primary blue (#0066CC), secondary green (#10B981). Large touch targets, AAA contrast. Simple, clear design.')}
               >
                 Healthcare
               </button>
               <button
                 className="example-chip"
-                onClick={() => setBrief('Gaming dashboard, dark mode, neon accents, competitive, futuristic')}
+                onClick={() => setBrief('Competitive gaming dashboard. Dark mode first. Neon purple (#A855F7) and cyan (#06B6D4) accents on dark background (#0F172A). Futuristic, tech-forward. Sharp angles, glowing effects. Monospace font for stats. High energy.')}
               >
                 Gaming
               </button>
               <button
                 className="example-chip"
-                onClick={() => setBrief('SaaS B2B platform, professional, clean, minimalist, productivity focused')}
+                onClick={() => setBrief('B2B SaaS productivity platform for enterprise. Professional, trustworthy, minimalist. Use Inter font. Primary indigo (#4F46E5), neutral grays. Clean, spacious layouts. Focus on readability and data density. Notion/Linear inspired.')}
               >
                 SaaS
               </button>

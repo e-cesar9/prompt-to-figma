@@ -25,6 +25,10 @@ interface DesignTokens {
   };
 }
 
+// ========================================
+// VALIDATION & AUTO-FIX UTILITIES
+// ========================================
+
 // Helper: Convert hex to RGB
 function hexToRgb(hex: string): RGB {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -40,6 +44,143 @@ function hexToRgb(hex: string): RGB {
 function hexToRgba(hex: string, alpha: number): RGBA {
   const rgb = hexToRgb(hex);
   return { ...rgb, a: alpha };
+}
+
+// Convert RGB to hex
+function rgbToHex(r: number, g: number, b: number): string {
+  const toHex = (n: number) => {
+    const hex = Math.round(n * 255).toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  };
+  return '#' + toHex(r) + toHex(g) + toHex(b);
+}
+
+// Calculate relative luminance (WCAG formula)
+function getLuminance(r: number, g: number, b: number): number {
+  const [rs, gs, bs] = [r, g, b].map(c => {
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+}
+
+// Calculate contrast ratio (WCAG)
+function getContrastRatio(hex1: string, hex2: string): number {
+  const rgb1 = hexToRgb(hex1);
+  const rgb2 = hexToRgb(hex2);
+  const lum1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
+  const lum2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
+  const lighter = Math.max(lum1, lum2);
+  const darker = Math.min(lum1, lum2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+// Darken/lighten color until target contrast is met
+function adjustColorForContrast(
+  color: string, 
+  background: string, 
+  targetContrast: number = 4.5,
+  maxIterations: number = 50
+): string {
+  let adjusted = hexToRgb(color);
+  let ratio = getContrastRatio(color, background);
+  
+  if (ratio >= targetContrast) return color;
+  
+  // Determine if we need to darken or lighten
+  const bgLum = getLuminance(hexToRgb(background).r, hexToRgb(background).g, hexToRgb(background).b);
+  const shouldDarken = bgLum > 0.5;
+  
+  for (let i = 0; i < maxIterations; i++) {
+    if (shouldDarken) {
+      adjusted.r *= 0.9;
+      adjusted.g *= 0.9;
+      adjusted.b *= 0.9;
+    } else {
+      adjusted.r = Math.min(1, adjusted.r * 1.1 + 0.05);
+      adjusted.g = Math.min(1, adjusted.g * 1.1 + 0.05);
+      adjusted.b = Math.min(1, adjusted.b * 1.1 + 0.05);
+    }
+    
+    const newHex = rgbToHex(adjusted.r, adjusted.g, adjusted.b);
+    ratio = getContrastRatio(newHex, background);
+    
+    if (ratio >= targetContrast) {
+      return newHex;
+    }
+  }
+  
+  return rgbToHex(adjusted.r, adjusted.g, adjusted.b);
+}
+
+// Validate and fix design tokens
+function validateAndFixTokens(tokens: DesignTokens): DesignTokens {
+  const fixed = JSON.parse(JSON.stringify(tokens)); // Deep clone
+  
+  // 1. FIX CONTRAST RATIOS (WCAG AA = 4.5:1 minimum)
+  // Primary color on white background
+  const primary500 = fixed.colors.primary['500'] || '#3B82F6';
+  const contrastOnWhite = getContrastRatio(primary500, '#FFFFFF');
+  
+  if (contrastOnWhite < 4.5) {
+    console.log(`⚠️ Primary-500 contrast too low (${contrastOnWhite.toFixed(2)}). Auto-fixing...`);
+    fixed.colors.primary['500'] = adjustColorForContrast(primary500, '#FFFFFF', 4.5);
+    fixed.colors.primary['600'] = adjustColorForContrast(primary500, '#FFFFFF', 7); // Darker variant
+  }
+  
+  // Semantic colors must be readable
+  if (fixed.colors.semantic) {
+    ['success', 'warning', 'error', 'info'].forEach(key => {
+      const color = fixed.colors.semantic[key];
+      if (color) {
+        const ratio = getContrastRatio(color, '#FFFFFF');
+        if (ratio < 4.5) {
+          console.log(`⚠️ ${key} contrast too low (${ratio.toFixed(2)}). Auto-fixing...`);
+          fixed.colors.semantic[key] = adjustColorForContrast(color, '#FFFFFF', 4.5);
+        }
+      }
+    });
+  }
+  
+  // 2. FIX SPACING SCALE (must be multiples of 4 or 8)
+  if (fixed.spacing) {
+    fixed.spacing = fixed.spacing.map((s: number) => {
+      const rounded = Math.round(s / 8) * 8;
+      return rounded === 0 ? s : rounded; // Keep 0 as-is
+    });
+    // Ensure minimum useful spacings exist
+    const requiredSpacings = [0, 4, 8, 12, 16, 24, 32, 48, 64];
+    requiredSpacings.forEach(s => {
+      if (!fixed.spacing.includes(s)) {
+        fixed.spacing.push(s);
+      }
+    });
+    fixed.spacing.sort((a: number, b: number) => a - b);
+  }
+  
+  // 3. FIX TYPOGRAPHY SIZES (minimum 14px for body text)
+  if (fixed.typography && fixed.typography.scale) {
+    fixed.typography.scale = fixed.typography.scale.map((style: any) => {
+      if (style.name.includes('Body') && style.size < 14) {
+        console.log(`⚠️ ${style.name} too small (${style.size}px). Setting to 14px minimum.`);
+        style.size = 14;
+      }
+      if (style.size < 11) {
+        console.log(`⚠️ ${style.name} too small (${style.size}px). Setting to 11px minimum.`);
+        style.size = 11;
+      }
+      return style;
+    });
+  }
+  
+  // 4. FIX BORDER RADIUS (must be multiple of 2 or 4)
+  if (fixed.borderRadius) {
+    fixed.borderRadius = fixed.borderRadius.map((r: number) => {
+      if (r === 9999) return r; // Keep "full" as-is
+      return Math.round(r / 4) * 4;
+    });
+  }
+  
+  return fixed;
 }
 
 // AI API call handler - supports Anthropic, OpenAI, and DeepSeek
@@ -121,6 +262,47 @@ async function generateDesignSystem(brief: string, apiKey: string, provider: 'an
 
 "${brief}"
 
+MANDATORY REQUIREMENTS (non-negotiable):
+1. ACCESSIBILITY (WCAG AA):
+   - All text/background combinations MUST have contrast ratio ≥ 4.5:1
+   - Primary-500 on white background ≥ 4.5:1
+   - Semantic colors (success/warning/error/info) readable on white
+   - Neutral-600+ must be readable on white for body text
+
+2. SPACING SYSTEM:
+   - Use 8px grid system (all spacing multiples of 8)
+   - Include: 0, 8, 16, 24, 32, 48, 64, 96, 128
+   - Consistent rhythm for layouts
+
+3. TYPOGRAPHY:
+   - Font family: Inter (or specify modern sans-serif in brief)
+   - Minimum 14px for body text (accessibility)
+   - Minimum 11px for small text
+   - Proper line-heights: 1.1-1.2 for headings, 1.5-1.6 for body
+   - Clear hierarchy: Display > H1 > H2 > H3 > Body
+
+4. COLOR SYSTEM:
+   - 11-stop scales (50-950) for primary/secondary/neutral
+   - 50: lightest, 500: base, 950: darkest
+   - Harmonious progression (not random)
+   - Semantic colors with light variants (successLight, etc.)
+
+5. DARK MODE:
+   - All colors must work in dark mode
+   - Provide complete dark palette
+   - Good contrast in both light and dark
+
+6. COMPLETENESS:
+   - Border radius scale (0, 4, 8, 12, 16, 24, 32, full)
+   - Shadow system (xs, sm, md, lg, xl, 2xl)
+   - All component states considered
+
+CONTEXT FROM BRIEF:
+- Interpret industry/audience (fintech = trustworthy, gaming = energetic, etc.)
+- Choose appropriate colors for brand personality
+- Ensure professional, modern aesthetic
+- Be creative but maintain usability
+
 Output ONLY valid JSON (no markdown, no explanation, no code blocks) with this exact structure:
 {
   "colors": {
@@ -178,7 +360,12 @@ Make the colors appropriate and harmonious for the brief. Be creative but profes
       throw new Error('Could not parse design tokens from AI response');
     }
 
-    const tokens: DesignTokens = JSON.parse(jsonMatch[0]);
+    let tokens: DesignTokens = JSON.parse(jsonMatch[0]);
+    
+    // Validate and auto-fix tokens (accessibility, spacing, etc.)
+    console.log('🔍 Validating design tokens...');
+    tokens = validateAndFixTokens(tokens);
+    console.log('✅ Tokens validated and fixed');
 
     // Create Figma design system
     await createFigmaDesignSystem(tokens, brief);
