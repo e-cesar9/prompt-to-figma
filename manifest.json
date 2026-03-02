@@ -1,6 +1,6 @@
 {
-  "name": "DesignAI - System + Screens + Code",
-  "id": "designai",
+  "name": "Tokn - Design Systems, Generated",
+  "id": "tokn",
   "api": "1.0.0",
   "main": "dist/code.js",
   "ui": "dist/ui.html",

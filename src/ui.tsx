@@ -139,8 +139,8 @@ function App() {
   return (
     <div className="app">
       <header className="header">
-        <h1>🤖 DesignAI</h1>
-        <p className="subtitle">AI-Powered Design System & Code Generator</p>
+        <h1>🪙 TOKN</h1>
+        <p className="subtitle">Design systems, generated.</p>
       </header>
 
       {/* Tabs */}
@@ -430,7 +430,7 @@ function App() {
       {/* Footer */}
       <footer className="footer">
         <p className="footer-text">
-          Made with ❤️ by Rico • <span className="badge">v1.1</span>
+          🪙 TOKN • <span className="badge">v2.0</span> • Design systems, generated.
         </p>
       </footer>
     </div>
