@@ -123,7 +123,7 @@ function App() {
       } else if (msg.type === 'code-generated') {
         setLoading(false);
         setGeneratedCode(msg.code);
-        setMessage('Code generated! ✨');
+        setMessage('Code generated!');
         setMessageType('success');
       } else if (msg.type === 'code-stream-start') {
         setLoading(true);
@@ -134,7 +134,7 @@ function App() {
         setGeneratedCode((prev) => prev + msg.chunk);
       } else if (msg.type === 'code-stream-end') {
         setLoading(false);
-        setMessage('Code generated! ✨');
+        setMessage('Code generated!');
         setMessageType('success');
         setTimeout(() => setMessage(''), 3000);
       }
@@ -260,7 +260,7 @@ function App() {
       <div className="content">
         {activeTab === 'settings' && (
           <div className="section">
-            <h2>⚙️ API Settings</h2>
+            <h2>API Settings</h2>
             <p className="description">
               Connect your AI provider to start generating designs.
             </p>
@@ -346,11 +346,11 @@ function App() {
             />
 
             <button className="button primary" onClick={handleGenerateSystem} disabled={loading}>
-              {loading ? '⏳ Generating...' : '✨ Generate Design System'}
+              {loading ? 'Generating...' : 'Generate Design System'}
             </button>
 
             <div className="examples">
-              <p className="examples-title">💡 Pro examples (detailed prompts = better results):</p>
+              <p className="examples-title">Pro examples (detailed prompts = better results):</p>
               <button
                 className="example-chip"
                 onClick={() =>
@@ -398,7 +398,7 @@ function App() {
             />
 
             <button className="button primary" onClick={handleGenerateScreen} disabled={loading}>
-              {loading ? '⏳ Generating...' : '🎨 Generate Screen'}
+              {loading ? 'Generating...' : 'Generate Screen'}
             </button>
 
             <div className="examples">
@@ -439,8 +439,8 @@ function App() {
             <p className="description">
               Select a frame in Figma, then export it to React, Vue, or HTML code.
               {apiKey.trim() 
-                ? ' 🧠 AI semantic detection enabled (button, input, form, h1-h6, etc.)' 
-                : ' ⚡ Using fast mode (configure API key in Settings for AI semantic detection).'}
+                ? ' AI semantic detection enabled (button, input, form, h1-h6, etc.)' 
+                : ' Using fast mode (configure API key in Settings for AI semantic detection).'}
             </p>
 
             <div className="format-selector">
@@ -479,7 +479,7 @@ function App() {
             </div>
 
             <button className="button primary" onClick={handleExportCode} disabled={loading}>
-              {loading ? '⏳ Exporting...' : '💻 Export Code'}
+              {loading ? 'Exporting...' : 'Export Code'}
             </button>
 
             {generatedCode && (
