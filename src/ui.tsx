@@ -576,13 +576,13 @@ function App() {
       {/* Status Message */}
       {message && (
         <div className={`message ${messageType}`}>
-          {loading && progressTotal === 0 && (
+          {loading && (
             <div className="spinner">
               <Icon name="loader" size={16} />
             </div>
           )}
           <div className="message-text">{message}</div>
-          {progressTotal > 0 && (
+          {loading && progressTotal > 0 && (
             <div className="progress-container">
               <div className="progress-bar">
                 <div 
