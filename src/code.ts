@@ -1612,7 +1612,7 @@ async function streamGenerateAndCreate(prompt: string, apiKey: string, provider:
           
           try {
             const parsed = JSON.parse(data);
-            if (parsed.type === 'content_block_delta' && parsed.delta?.text) {
+            if (parsed.type === 'content_block_delta' && parsed.delta && parsed.delta.text) {
               buffer += parsed.delta.text;
               
               // Try to parse and create elements as they come in
