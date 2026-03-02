@@ -3,6 +3,22 @@
 
 figma.showUI(__html__, { width: 420, height: 650, themeColors: true });
 
+// Cache fonts globally to avoid reloading
+let fontsLoaded = false;
+
+async function loadFontsOnce() {
+  if (fontsLoaded) return;
+  
+  await Promise.all([
+    figma.loadFontAsync({ family: 'Inter', style: 'Regular' }),
+    figma.loadFontAsync({ family: 'Inter', style: 'Medium' }),
+    figma.loadFontAsync({ family: 'Inter', style: 'Semi Bold' }),
+    figma.loadFontAsync({ family: 'Inter', style: 'Bold' })
+  ]);
+  
+  fontsLoaded = true;
+}
+
 interface DesignTokens {
   colors: {
     primary: Record<string, string>;
@@ -386,13 +402,8 @@ function delay(ms: number) {
 async function createFigmaDesignSystem(tokens: DesignTokens, brief: string) {
   figma.ui.postMessage({ type: 'progress', message: '⏳ Loading fonts...', step: 0, total: 7 });
   
-  // Load fonts in parallel
-  await Promise.all([
-    figma.loadFontAsync({ family: 'Inter', style: 'Regular' }),
-    figma.loadFontAsync({ family: 'Inter', style: 'Medium' }),
-    figma.loadFontAsync({ family: 'Inter', style: 'Semi Bold' }),
-    figma.loadFontAsync({ family: 'Inter', style: 'Bold' })
-  ]);
+  // Load fonts (cached after first load)
+  await loadFontsOnce();
 
   const page = figma.createPage();
   page.name = `🎨 Design System`;
@@ -1568,15 +1579,8 @@ async function streamGenerateAndCreate(prompt: string, apiKey: string, provider:
   let frame: FrameNode | null = null;
   let elementsCreated = 0;
   
-  figma.ui.postMessage({ type: 'progress', message: '⏳ Loading fonts...', step: 0, total: 1 });
-  
-  // Load all fonts in parallel for speed
-  await Promise.all([
-    figma.loadFontAsync({ family: 'Inter', style: 'Regular' }),
-    figma.loadFontAsync({ family: 'Inter', style: 'Medium' }),
-    figma.loadFontAsync({ family: 'Inter', style: 'Semi Bold' }),
-    figma.loadFontAsync({ family: 'Inter', style: 'Bold' })
-  ]);
+  // Load fonts (cached after first load)
+  await loadFontsOnce();
 
   if (provider === 'anthropic') {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -1859,15 +1863,8 @@ Create a complete, realistic screen with ALL necessary text elements. Every inte
 
 // Create screen from spec
 async function createScreenFromSpec(spec: any) {
-  figma.ui.postMessage({ type: 'progress', message: '⏳ Loading fonts...', step: 0, total: ((spec.elements && spec.elements.length) || 0) + 1 });
-  
-  // Load fonts in parallel
-  await Promise.all([
-    figma.loadFontAsync({ family: 'Inter', style: 'Regular' }),
-    figma.loadFontAsync({ family: 'Inter', style: 'Medium' }),
-    figma.loadFontAsync({ family: 'Inter', style: 'Semi Bold' }),
-    figma.loadFontAsync({ family: 'Inter', style: 'Bold' })
-  ]);
+  // Load fonts (cached after first load)
+  await loadFontsOnce();
 
   const frame = figma.createFrame();
   frame.name = spec.screenName || 'Generated Screen';
