@@ -216,7 +216,7 @@ function App() {
                   className={`provider-btn ${aiProvider === 'deepseek' ? 'active' : ''}`}
                   onClick={() => setAiProvider('deepseek')}
                 >
-                  🚀 DeepSeek
+                  🧠 DeepSeek R1
                 </button>
               </div>
             </div>
