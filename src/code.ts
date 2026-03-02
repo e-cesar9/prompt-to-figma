@@ -42,8 +42,8 @@ function hexToRgba(hex: string, alpha: number): RGBA {
   return { ...rgb, a: alpha };
 }
 
-// AI API call handler - supports both Anthropic and OpenAI
-async function callAI(prompt: string, apiKey: string, provider: 'anthropic' | 'openai'): Promise<string> {
+// AI API call handler - supports Anthropic, OpenAI, and DeepSeek
+async function callAI(prompt: string, apiKey: string, provider: 'anthropic' | 'openai' | 'deepseek'): Promise<string> {
   if (provider === 'anthropic') {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -66,7 +66,7 @@ async function callAI(prompt: string, apiKey: string, provider: 'anthropic' | 'o
 
     const data = await response.json();
     return data.content[0].text;
-  } else {
+  } else if (provider === 'openai') {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -74,8 +74,8 @@ async function callAI(prompt: string, apiKey: string, provider: 'anthropic' | 'o
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4-turbo-preview',
-        max_tokens: 8192,
+        model: 'gpt-4o',
+        max_tokens: 4096,
         messages: [{ role: 'user', content: prompt }],
       }),
     });
@@ -83,6 +83,28 @@ async function callAI(prompt: string, apiKey: string, provider: 'anthropic' | 'o
     if (!response.ok) {
       const error = await response.text();
       throw new Error(`OpenAI API error: ${response.status} - ${error}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content;
+  } else {
+    // DeepSeek
+    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        max_tokens: 8192,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`DeepSeek API error: ${response.status} - ${error}`);
     }
 
     const data = await response.json();

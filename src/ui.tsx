@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom/client';
 function App() {
   const [activeTab, setActiveTab] = useState<'system' | 'screen' | 'code' | 'settings'>('system');
   const [apiKey, setApiKey] = useState('');
-  const [aiProvider, setAiProvider] = useState<'anthropic' | 'openai'>('anthropic');
+  const [aiProvider, setAiProvider] = useState<'anthropic' | 'openai' | 'deepseek'>('anthropic');
   const [brief, setBrief] = useState('');
   const [screenPrompt, setScreenPrompt] = useState('');
   const [codeFormat, setCodeFormat] = useState<'react' | 'vue' | 'html'>('react');
@@ -171,32 +171,44 @@ function App() {
                   className={`provider-btn ${aiProvider === 'anthropic' ? 'active' : ''}`}
                   onClick={() => setAiProvider('anthropic')}
                 >
-                  🧠 Claude (Anthropic)
+                  🧠 Claude
                 </button>
                 <button
                   className={`provider-btn ${aiProvider === 'openai' ? 'active' : ''}`}
                   onClick={() => setAiProvider('openai')}
                 >
-                  🤖 GPT-4 (OpenAI)
+                  🤖 GPT-4o
+                </button>
+                <button
+                  className={`provider-btn ${aiProvider === 'deepseek' ? 'active' : ''}`}
+                  onClick={() => setAiProvider('deepseek')}
+                >
+                  🚀 DeepSeek
                 </button>
               </div>
             </div>
 
             <div className="form-group">
               <label className="label">
-                {aiProvider === 'anthropic' ? 'Anthropic API Key' : 'OpenAI API Key'}
+                {aiProvider === 'anthropic' ? 'Anthropic API Key' : 
+                 aiProvider === 'openai' ? 'OpenAI API Key' : 
+                 'DeepSeek API Key'}
               </label>
               <input
                 type="password"
                 className="input"
-                placeholder={aiProvider === 'anthropic' ? 'sk-ant-...' : 'sk-...'}
+                placeholder={aiProvider === 'anthropic' ? 'sk-ant-...' : 
+                             aiProvider === 'openai' ? 'sk-...' : 
+                             'sk-...'}
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
               />
               <p className="help-text">
                 {aiProvider === 'anthropic' 
                   ? 'Get your key at console.anthropic.com'
-                  : 'Get your key at platform.openai.com'}
+                  : aiProvider === 'openai'
+                  ? 'Get your key at platform.openai.com'
+                  : 'Get your key at platform.deepseek.com'}
               </p>
             </div>
 
