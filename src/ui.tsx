@@ -63,6 +63,18 @@ function App() {
         setGeneratedCode(msg.code);
         setMessage('Code generated! ✨');
         setMessageType('success');
+      } else if (msg.type === 'code-stream-start') {
+        setLoading(true);
+        setGeneratedCode('');
+        setMessage('Analyzing design with AI...');
+        setMessageType('info');
+      } else if (msg.type === 'code-chunk') {
+        setGeneratedCode((prev) => prev + msg.chunk);
+      } else if (msg.type === 'code-stream-end') {
+        setLoading(false);
+        setMessage('Code generated! ✨');
+        setMessageType('success');
+        setTimeout(() => setMessage(''), 3000);
       }
     };
   }, []);
@@ -126,7 +138,20 @@ function App() {
   };
 
   const handleExportCode = () => {
-    parent.postMessage({ pluginMessage: { type: 'export-code', format: codeFormat } }, '*');
+    if (!apiKey.trim()) {
+      setMessage('Please add your API key in Settings first');
+      setMessageType('error');
+      setActiveTab('settings');
+      return;
+    }
+    parent.postMessage({ 
+      pluginMessage: { 
+        type: 'export-code', 
+        format: codeFormat,
+        apiKey,
+        provider: aiProvider
+      } 
+    }, '*');
   };
 
   const copyCode = () => {

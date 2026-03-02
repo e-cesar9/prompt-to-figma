@@ -1518,8 +1518,106 @@ async function createScreenFromSpec(spec: any) {
   figma.viewport.scrollAndZoomIntoView([frame]);
 }
 
-// Export to code
-async function exportToCode(format: 'react' | 'vue' | 'html') {
+// Extract node structure for AI analysis
+function extractNodeStructure(node: SceneNode, nodeMap: Map<string, any> = new Map()): any {
+  const data: any = {
+    id: node.id,
+    type: node.type,
+    name: node.name,
+  };
+
+  if (node.type === 'TEXT') {
+    const textNode = node as TextNode;
+    data.text = textNode.characters;
+    data.fontSize = textNode.fontSize;
+    data.fontWeight = (textNode.fontName as FontName).style?.includes('Bold') ? 700 : 400;
+  }
+
+  if (node.type === 'FRAME' || node.type === 'RECTANGLE' || node.type === 'COMPONENT' || node.type === 'INSTANCE') {
+    const container = node as FrameNode;
+    data.width = Math.round(container.width);
+    data.height = Math.round(container.height);
+    data.x = Math.round(container.x);
+    data.y = Math.round(container.y);
+
+    // Visual properties
+    data.hasFill = container.fills && Array.isArray(container.fills) && container.fills.length > 0;
+    data.hasStroke = container.strokes && Array.isArray(container.strokes) && container.strokes.length > 0;
+    
+    if ('cornerRadius' in container && typeof container.cornerRadius === 'number') {
+      data.cornerRadius = container.cornerRadius;
+    }
+
+    if ('paddingLeft' in container) {
+      data.padding = {
+        left: container.paddingLeft,
+        right: container.paddingRight,
+        top: container.paddingTop,
+        bottom: container.paddingBottom,
+      };
+    }
+
+    // Children
+    if ('children' in container && container.children) {
+      data.children = container.children.map(child => child.id);
+      container.children.forEach(child => extractNodeStructure(child, nodeMap));
+    }
+  }
+
+  nodeMap.set(node.id, data);
+  return data;
+}
+
+// Get semantic tags from AI
+async function getSemanticTags(rootNode: SceneNode, apiKey: string, provider: 'anthropic' | 'openai' | 'deepseek'): Promise<Map<string, any>> {
+  const nodeMap = new Map<string, any>();
+  extractNodeStructure(rootNode, nodeMap);
+
+  const nodes = Array.from(nodeMap.values());
+
+  const prompt = `You are an expert frontend developer. Analyze this Figma design structure and return semantic HTML tags for each node.
+
+Structure:
+${JSON.stringify(nodes, null, 2)}
+
+Rules:
+- Detect buttons (solid fill, corner radius, centered text, clickable)
+- Detect inputs (stroke border, height 40-60px, often has label above)
+- Detect forms (contains multiple inputs/buttons)
+- Detect labels (small text above inputs, 12-14px)
+- Detect headings (large text: h1=32+px, h2=24+px, h3=20+px, h4=18+px)
+- Detect textareas (tall input-like elements, height > 80px)
+- Detect checkboxes/radios (small squares/circles)
+- Use semantic tags (section, form, button, input, label, h1-h6)
+
+Return ONLY valid JSON (no markdown, no explanation):
+{
+  "nodeId1": { "tag": "form" },
+  "nodeId2": { "tag": "label" },
+  "nodeId3": { "tag": "input", "type": "email", "placeholder": "Enter email" },
+  "nodeId4": { "tag": "button" },
+  "nodeId5": { "tag": "h1" }
+}`;
+
+  const response = await callAI(prompt, apiKey, provider);
+  const jsonMatch = response.match(/\{[\s\S]*\}/);
+  
+  if (!jsonMatch) {
+    throw new Error('AI did not return valid JSON');
+  }
+
+  const mapping = JSON.parse(jsonMatch[0]);
+  const result = new Map<string, any>();
+  
+  for (const [nodeId, semantic] of Object.entries(mapping)) {
+    result.set(nodeId, semantic);
+  }
+
+  return result;
+}
+
+// Export to code with AI-powered semantic detection + streaming
+async function exportToCode(format: 'react' | 'vue' | 'html', apiKey: string, provider: 'anthropic' | 'openai' | 'deepseek') {
   const selection = figma.currentPage.selection;
 
   if (selection.length === 0) {
@@ -1528,21 +1626,43 @@ async function exportToCode(format: 'react' | 'vue' | 'html') {
   }
 
   const node = selection[0];
-  let code = '';
 
-  if (format === 'react') {
-    code = generateReactCode(node);
-  } else if (format === 'vue') {
-    code = generateVueCode(node);
-  } else {
-    code = generateHTMLCode(node);
+  try {
+    figma.ui.postMessage({ type: 'code-stream-start', format });
+    figma.ui.postMessage({ type: 'code-chunk', chunk: '// Analyzing design...\n' });
+
+    // Get semantic tags from AI
+    const semanticMap = await getSemanticTags(node, apiKey, provider);
+
+    figma.ui.postMessage({ type: 'code-chunk', chunk: '// Generating code...\n\n' });
+
+    let code = '';
+
+    if (format === 'react') {
+      code = generateReactCodeWithSemantics(node, semanticMap);
+    } else if (format === 'vue') {
+      code = generateVueCodeWithSemantics(node, semanticMap);
+    } else {
+      code = generateHTMLCodeWithSemantics(node, semanticMap);
+    }
+
+    // Stream code line by line
+    const lines = code.split('\n');
+    for (const line of lines) {
+      figma.ui.postMessage({ type: 'code-chunk', chunk: line + '\n' });
+      await delay(20); // Small delay for streaming effect
+    }
+
+    figma.ui.postMessage({ type: 'code-stream-end' });
+  } catch (error: any) {
+    figma.ui.postMessage({ type: 'error', message: error.message });
   }
-
-  figma.ui.postMessage({ type: 'code-generated', code, format });
 }
 
-// Recursive function to generate JSX from Figma node
-function nodeToJSX(node: SceneNode, indent: string = '      '): string {
+// Recursive function to generate JSX from Figma node with AI semantics
+function nodeToJSXWithSemantics(node: SceneNode, semanticMap: Map<string, any>, indent: string = '      '): string {
+  const semantic = semanticMap.get(node.id) || { tag: 'div' };
+  
   if (node.type === 'TEXT') {
     const textNode = node as TextNode;
     const styles: string[] = [];
@@ -1558,7 +1678,18 @@ function nodeToJSX(node: SceneNode, indent: string = '      '): string {
       }
     }
     
-    return `${indent}<div style={{ ${styles.join(', ')} }}>${textNode.characters}</div>`;
+    const tag = semantic.tag || 'div';
+    const content = textNode.characters;
+    
+    if (tag === 'label') {
+      return `${indent}<${tag} style={{ ${styles.join(', ')} }}>${content}</${tag}>`;
+    }
+    
+    if (tag.startsWith('h')) {
+      return `${indent}<${tag} style={{ ${styles.join(', ')} }}>${content}</${tag}>`;
+    }
+    
+    return `${indent}<${tag} style={{ ${styles.join(', ')} }}>${content}</${tag}>`;
   }
   
   if (node.type === 'FRAME' || node.type === 'RECTANGLE' || node.type === 'COMPONENT' || node.type === 'INSTANCE') {
@@ -1588,27 +1719,43 @@ function nodeToJSX(node: SceneNode, indent: string = '      '): string {
       styles.push(`borderRadius: ${container.cornerRadius}px`);
     }
     
+    const tag = semantic.tag || 'div';
+    const inputType = semantic.type;
+    const placeholder = semantic.placeholder;
+    
+    // Input/textarea special case (self-closing or with placeholder)
+    if (tag === 'input') {
+      const typeAttr = inputType ? ` type="${inputType}"` : '';
+      const placeholderAttr = placeholder ? ` placeholder="${placeholder}"` : '';
+      return `${indent}<${tag}${typeAttr}${placeholderAttr} style={{ ${styles.join(', ')} }} />`;
+    }
+    
+    if (tag === 'textarea') {
+      const placeholderAttr = placeholder ? ` placeholder="${placeholder}"` : '';
+      return `${indent}<${tag}${placeholderAttr} style={{ ${styles.join(', ')} }} />`;
+    }
+    
     // Generate children recursively
     let children = '';
     if ('children' in container && container.children) {
       children = container.children
-        .map((child) => nodeToJSX(child, indent + '  '))
+        .map((child) => nodeToJSXWithSemantics(child, semanticMap, indent + '  '))
         .join('\n');
     }
     
     if (children) {
-      return `${indent}<div style={{ ${styles.join(', ')} }}>\n${children}\n${indent}</div>`;
+      return `${indent}<${tag} style={{ ${styles.join(', ')} }}>\n${children}\n${indent}</${tag}>`;
     } else {
-      return `${indent}<div style={{ ${styles.join(', ')} }} />`;
+      return `${indent}<${tag} style={{ ${styles.join(', ')} }} />`;
     }
   }
   
   return `${indent}{/* ${node.type} not supported */}`;
 }
 
-function generateReactCode(node: SceneNode): string {
+function generateReactCodeWithSemantics(node: SceneNode, semanticMap: Map<string, any>): string {
   const name = node.name.replace(/[^a-zA-Z0-9]/g, '') || 'Component';
-  const jsx = nodeToJSX(node);
+  const jsx = nodeToJSXWithSemantics(node, semanticMap);
 
   return `import React from 'react';
 
@@ -1621,37 +1768,65 @@ ${jsx}
 export default ${name};`;
 }
 
-// Recursive function to generate HTML from Figma node
-function nodeToHTML(node: SceneNode, indent: string = '  '): string {
+// Recursive function to generate HTML from Figma node with AI semantics
+function nodeToHTMLWithSemantics(node: SceneNode, semanticMap: Map<string, any>, indent: string = '  '): string {
+  const semantic = semanticMap.get(node.id) || { tag: 'div' };
+  const className = node.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'element';
+  
   if (node.type === 'TEXT') {
     const textNode = node as TextNode;
-    return `${indent}<div class="text">${textNode.characters}</div>`;
+    const tag = semantic.tag || 'div';
+    const content = textNode.characters;
+    
+    if (tag === 'label') {
+      return `${indent}<${tag} class="${className}">${content}</${tag}>`;
+    }
+    
+    if (tag.startsWith('h')) {
+      return `${indent}<${tag} class="${className}">${content}</${tag}>`;
+    }
+    
+    return `${indent}<${tag} class="${className}">${content}</${tag}>`;
   }
   
   if (node.type === 'FRAME' || node.type === 'RECTANGLE' || node.type === 'COMPONENT' || node.type === 'INSTANCE') {
     const container = node as FrameNode;
-    const className = node.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'element';
+    const tag = semantic.tag || 'div';
+    const inputType = semantic.type;
+    const placeholder = semantic.placeholder;
+    
+    // Input/textarea special case
+    if (tag === 'input') {
+      const typeAttr = inputType ? ` type="${inputType}"` : '';
+      const placeholderAttr = placeholder ? ` placeholder="${placeholder}"` : '';
+      return `${indent}<${tag} class="${className}"${typeAttr}${placeholderAttr} />`;
+    }
+    
+    if (tag === 'textarea') {
+      const placeholderAttr = placeholder ? ` placeholder="${placeholder}"` : '';
+      return `${indent}<${tag} class="${className}"${placeholderAttr}></${tag}>`;
+    }
     
     let children = '';
     if ('children' in container && container.children) {
       children = container.children
-        .map((child) => nodeToHTML(child, indent + '  '))
+        .map((child) => nodeToHTMLWithSemantics(child, semanticMap, indent + '  '))
         .join('\n');
     }
     
     if (children) {
-      return `${indent}<div class="${className}">\n${children}\n${indent}</div>`;
+      return `${indent}<${tag} class="${className}">\n${children}\n${indent}</${tag}>`;
     } else {
-      return `${indent}<div class="${className}"></div>`;
+      return `${indent}<${tag} class="${className}"></${tag}>`;
     }
   }
   
   return `${indent}<!-- ${node.type} not supported -->`;
 }
 
-function generateVueCode(node: SceneNode): string {
+function generateVueCodeWithSemantics(node: SceneNode, semanticMap: Map<string, any>): string {
   const name = node.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'component';
-  const html = nodeToHTML(node);
+  const html = nodeToHTMLWithSemantics(node, semanticMap);
   
   return `<template>
 ${html}
@@ -1666,9 +1841,9 @@ ${html}
 </style>`;
 }
 
-function generateHTMLCode(node: SceneNode): string {
+function generateHTMLCodeWithSemantics(node: SceneNode, semanticMap: Map<string, any>): string {
   const name = node.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'component';
-  const html = nodeToHTML(node, '  ');
+  const html = nodeToHTMLWithSemantics(node, semanticMap, '  ');
   
   return `<!DOCTYPE html>
 <html lang="en">
@@ -1702,7 +1877,7 @@ figma.ui.onmessage = async (msg) => {
   } else if (msg.type === 'generate-screen') {
     await generateScreen(msg.prompt, msg.apiKey, msg.provider || 'anthropic');
   } else if (msg.type === 'export-code') {
-    await exportToCode(msg.format);
+    await exportToCode(msg.format, msg.apiKey, msg.provider || 'anthropic');
   } else if (msg.type === 'cancel') {
     figma.closePlugin();
   }
