@@ -4,10 +4,10 @@
   "description": "AI-powered design system generator, screen creator, and code exporter for Figma",
   "main": "dist/code.js",
   "scripts": {
-    "build": "npm run build:ui && npm run build:code && npm run copy:html",
+    "build": "npm run build:ui && npm run build:code && npm run copy:assets",
     "build:ui": "esbuild src/ui.tsx --bundle --outfile=dist/ui.js --target=es2015",
     "build:code": "esbuild src/code.ts --bundle --outfile=dist/code.js --platform=node --target=es2015 --external:@figma",
-    "copy:html": "mkdir -p dist && cp src/ui.html dist/ui.html",
+    "copy:assets": "mkdir -p dist && cp src/ui.html dist/ui.html && cp src/ui.css dist/ui.css",
     "watch": "concurrently \"npm run build:ui -- --watch\" \"npm run build:code -- --watch\"",
     "dev": "npm run watch"
   },
