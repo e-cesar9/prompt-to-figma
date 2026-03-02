@@ -219,8 +219,7 @@ function App() {
     <div className="app">
       <header className="header">
         <h1>
-          <Icon name="layers" size={24} />
-          Prompt to Design, to Code
+          Prompt, Design, Code
         </h1>
         <p className="subtitle">Design, generated, coded.</p>
       </header>
