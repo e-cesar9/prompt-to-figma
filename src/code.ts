@@ -74,7 +74,7 @@ async function callAI(prompt: string, apiKey: string, provider: 'anthropic' | 'o
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-5.2',
         max_tokens: 4096,
         messages: [{ role: 'user', content: prompt }],
       }),
@@ -88,7 +88,7 @@ async function callAI(prompt: string, apiKey: string, provider: 'anthropic' | 'o
     const data = await response.json();
     return data.choices[0].message.content;
   } else {
-    // DeepSeek
+    // DeepSeek - using deepseek-reasoner (v3.2 with thinking mode, 128K context)
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -96,7 +96,7 @@ async function callAI(prompt: string, apiKey: string, provider: 'anthropic' | 'o
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'deepseek-chat',
+        model: 'deepseek-reasoner',
         max_tokens: 8192,
         messages: [{ role: 'user', content: prompt }],
       }),

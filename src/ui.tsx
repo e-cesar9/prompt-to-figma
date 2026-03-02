@@ -177,13 +177,13 @@ function App() {
                   className={`provider-btn ${aiProvider === 'openai' ? 'active' : ''}`}
                   onClick={() => setAiProvider('openai')}
                 >
-                  🤖 GPT-4o
+                  🤖 GPT-5.2
                 </button>
                 <button
                   className={`provider-btn ${aiProvider === 'deepseek' ? 'active' : ''}`}
                   onClick={() => setAiProvider('deepseek')}
                 >
-                  🚀 DeepSeek
+                  🚀 DeepSeek-R
                 </button>
               </div>
             </div>
