@@ -325,7 +325,7 @@ function App() {
             </div>
 
             <button className="button primary" onClick={saveApiKey}>
-              💾 Save Settings
+              Save Settings
             </button>
 
             {apiKey && (
