@@ -577,9 +577,7 @@ function App() {
       {message && (
         <div className={`message ${messageType}`}>
           {loading && (
-            <div className="spinner">
-              <Icon name="loader" size={16} />
-            </div>
+            <div className="spinner">🐀</div>
           )}
           <div className="message-text">{message}</div>
           {loading && progressTotal > 0 && (
