@@ -33,6 +33,7 @@ function App() {
         setAiProvider(msg.provider || 'anthropic');
       } else if (msg.type === 'progress') {
         // Progressive creation updates
+        console.log('🔥 PROGRESS:', msg.message, `${msg.step}/${msg.total}`);
         setLoading(true);
         setMessage(msg.message);
         setMessageType('info');

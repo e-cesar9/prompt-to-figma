@@ -213,13 +213,14 @@ async function createFigmaDesignSystem(tokens: DesignTokens, brief: string) {
   const sectionGap = 100;
 
   // === 1. COLORS SECTION ===
+  await delay(500); // Pause before starting
   figma.ui.postMessage({ type: 'progress', message: '🎨 Creating color palettes...', step: 1, total: 7 });
   const colorsFrame = await createColorsSection(tokens);
   colorsFrame.x = xOffset;
   colorsFrame.y = 0;
   page.appendChild(colorsFrame);
   figma.viewport.scrollAndZoomIntoView([colorsFrame]); // Show it immediately
-  await delay(300); // Small delay for visual effect
+  await delay(1500); // Longer delay so user can see it
   xOffset += colorsFrame.width + sectionGap;
 
   // === 2. TYPOGRAPHY SECTION ===
@@ -228,7 +229,7 @@ async function createFigmaDesignSystem(tokens: DesignTokens, brief: string) {
   typoFrame.x = xOffset;
   typoFrame.y = 0;
   page.appendChild(typoFrame);
-  await delay(300);
+  await delay(1500);
   xOffset += typoFrame.width + sectionGap;
 
   // === 3. SPACING SECTION ===
@@ -237,7 +238,7 @@ async function createFigmaDesignSystem(tokens: DesignTokens, brief: string) {
   spacingFrame.x = xOffset;
   spacingFrame.y = 0;
   page.appendChild(spacingFrame);
-  await delay(300);
+  await delay(1200);
   xOffset += spacingFrame.width + sectionGap;
 
   // === 4. SHADOWS SECTION ===
@@ -246,7 +247,7 @@ async function createFigmaDesignSystem(tokens: DesignTokens, brief: string) {
   shadowsFrame.x = xOffset;
   shadowsFrame.y = 0;
   page.appendChild(shadowsFrame);
-  await delay(300);
+  await delay(1200);
   xOffset += shadowsFrame.width + sectionGap;
 
   // === 5. COMPONENTS SECTION (Light Mode) ===
@@ -255,7 +256,7 @@ async function createFigmaDesignSystem(tokens: DesignTokens, brief: string) {
   componentsFrame.x = 0;
   componentsFrame.y = 900;
   page.appendChild(componentsFrame);
-  await delay(500); // Longer delay for complex section
+  await delay(2000); // Longer for complex section
 
   // === 6. COMPONENTS SECTION (Dark Mode) ===
   figma.ui.postMessage({ type: 'progress', message: '🌙 Creating dark mode components...', step: 6, total: 7 });
@@ -263,7 +264,7 @@ async function createFigmaDesignSystem(tokens: DesignTokens, brief: string) {
   darkComponentsFrame.x = componentsFrame.width + sectionGap;
   darkComponentsFrame.y = 900;
   page.appendChild(darkComponentsFrame);
-  await delay(500);
+  await delay(2000);
 
   // === 7. ICONS PLACEHOLDER ===
   figma.ui.postMessage({ type: 'progress', message: '🎯 Creating icons section...', step: 7, total: 7 });
@@ -271,7 +272,7 @@ async function createFigmaDesignSystem(tokens: DesignTokens, brief: string) {
   iconsFrame.x = 0;
   iconsFrame.y = 2200;
   page.appendChild(iconsFrame);
-  await delay(200);
+  await delay(800);
 
   figma.viewport.scrollAndZoomIntoView([colorsFrame]);
 }
