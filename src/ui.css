@@ -15,7 +15,9 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Clash Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Clash Display', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .app {
@@ -46,13 +48,14 @@ h1, h2, h3, h4, h5, h6 {
   color: hsl(240 3.8% 46.1%);
 }
 
-/* Tabs - shadcn style */
+/* Tabs - shadcn style with animated indicator */
 .tabs {
   display: flex;
   gap: 0;
   padding: 0 20px;
   background: hsl(0 0% 100%);
   border-bottom: 1px solid hsl(240 5.9% 90%);
+  position: relative;
 }
 
 .tab {
@@ -60,16 +63,17 @@ h1, h2, h3, h4, h5, h6 {
   padding: 10px 14px;
   background: transparent;
   border: none;
-  border-bottom: 2px solid transparent;
   font-size: 13px;
   font-weight: 500;
   color: hsl(240 3.8% 46.1%);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: color 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
+  position: relative;
+  z-index: 1;
 }
 
 .tab:hover {
@@ -78,8 +82,18 @@ h1, h2, h3, h4, h5, h6 {
 
 .tab.active {
   color: hsl(240 10% 3.9%);
-  border-bottom-color: hsl(240 10% 3.9%);
   font-weight: 600;
+}
+
+.tab-indicator {
+  position: absolute;
+  bottom: -1px;
+  left: 20px;
+  width: calc((100% - 40px) / 4);
+  height: 2px;
+  background: hsl(240 10% 3.9%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
 }
 
 /* Content */

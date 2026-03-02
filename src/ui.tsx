@@ -262,6 +262,16 @@ function App() {
           <Icon name="settings" size={16} />
           Settings
         </button>
+        <div 
+          className="tab-indicator" 
+          style={{
+            transform: `translateX(${
+              activeTab === 'system' ? '0%' : 
+              activeTab === 'screen' ? '100%' : 
+              activeTab === 'code' ? '200%' : '300%'
+            })`
+          }}
+        />
       </div>
 
       {/* Content */}
