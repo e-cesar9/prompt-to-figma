@@ -1541,17 +1541,41 @@ async function exportToCode(format: 'react' | 'vue' | 'html') {
   figma.ui.postMessage({ type: 'code-generated', code, format });
 }
 
-function generateReactCode(node: SceneNode): string {
-  const name = node.name.replace(/[^a-zA-Z0-9]/g, '') || 'Component';
-  let styles: string[] = [];
-
-  if (node.type === 'FRAME' || node.type === 'RECTANGLE' || node.type === 'COMPONENT') {
-    const rect = node as FrameNode;
-    styles.push(`width: ${Math.round(rect.width)}px`);
-    styles.push(`height: ${Math.round(rect.height)}px`);
-
-    if (rect.fills && Array.isArray(rect.fills) && rect.fills.length > 0) {
-      const fill = rect.fills[0] as SolidPaint;
+// Recursive function to generate JSX from Figma node
+function nodeToJSX(node: SceneNode, indent: string = '      '): string {
+  if (node.type === 'TEXT') {
+    const textNode = node as TextNode;
+    const styles: string[] = [];
+    styles.push(`fontSize: ${Math.round(textNode.fontSize as number)}px`);
+    
+    if (textNode.fills && Array.isArray(textNode.fills) && textNode.fills.length > 0) {
+      const fill = textNode.fills[0] as SolidPaint;
+      if (fill.type === 'SOLID') {
+        const r = Math.round(fill.color.r * 255);
+        const g = Math.round(fill.color.g * 255);
+        const b = Math.round(fill.color.b * 255);
+        styles.push(`color: 'rgb(${r}, ${g}, ${b})'`);
+      }
+    }
+    
+    return `${indent}<div style={{ ${styles.join(', ')} }}>${textNode.characters}</div>`;
+  }
+  
+  if (node.type === 'FRAME' || node.type === 'RECTANGLE' || node.type === 'COMPONENT' || node.type === 'INSTANCE') {
+    const container = node as FrameNode;
+    const styles: string[] = [];
+    
+    styles.push(`width: ${Math.round(container.width)}px`);
+    styles.push(`height: ${Math.round(container.height)}px`);
+    
+    if (container.x !== undefined && container.y !== undefined && container.parent && container.parent.type !== 'PAGE') {
+      styles.push(`position: 'absolute'`);
+      styles.push(`left: ${Math.round(container.x)}px`);
+      styles.push(`top: ${Math.round(container.y)}px`);
+    }
+    
+    if (container.fills && Array.isArray(container.fills) && container.fills.length > 0) {
+      const fill = container.fills[0] as SolidPaint;
       if (fill.type === 'SOLID') {
         const r = Math.round(fill.color.r * 255);
         const g = Math.round(fill.color.g * 255);
@@ -1559,35 +1583,78 @@ function generateReactCode(node: SceneNode): string {
         styles.push(`backgroundColor: 'rgb(${r}, ${g}, ${b})'`);
       }
     }
-
-    if ('cornerRadius' in rect && rect.cornerRadius && typeof rect.cornerRadius === 'number') {
-      styles.push(`borderRadius: ${rect.cornerRadius}px`);
+    
+    if ('cornerRadius' in container && container.cornerRadius && typeof container.cornerRadius === 'number') {
+      styles.push(`borderRadius: ${container.cornerRadius}px`);
+    }
+    
+    // Generate children recursively
+    let children = '';
+    if ('children' in container && container.children) {
+      children = container.children
+        .map((child) => nodeToJSX(child, indent + '  '))
+        .join('\n');
+    }
+    
+    if (children) {
+      return `${indent}<div style={{ ${styles.join(', ')} }}>\n${children}\n${indent}</div>`;
+    } else {
+      return `${indent}<div style={{ ${styles.join(', ')} }} />`;
     }
   }
+  
+  return `${indent}{/* ${node.type} not supported */}`;
+}
+
+function generateReactCode(node: SceneNode): string {
+  const name = node.name.replace(/[^a-zA-Z0-9]/g, '') || 'Component';
+  const jsx = nodeToJSX(node);
 
   return `import React from 'react';
 
 export function ${name}() {
   return (
-    <div
-      style={{
-        ${styles.join(',\n        ')}
-      }}
-    >
-      {/* Add your content here */}
-    </div>
+${jsx}
   );
 }
 
 export default ${name};`;
 }
 
+// Recursive function to generate HTML from Figma node
+function nodeToHTML(node: SceneNode, indent: string = '  '): string {
+  if (node.type === 'TEXT') {
+    const textNode = node as TextNode;
+    return `${indent}<div class="text">${textNode.characters}</div>`;
+  }
+  
+  if (node.type === 'FRAME' || node.type === 'RECTANGLE' || node.type === 'COMPONENT' || node.type === 'INSTANCE') {
+    const container = node as FrameNode;
+    const className = node.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'element';
+    
+    let children = '';
+    if ('children' in container && container.children) {
+      children = container.children
+        .map((child) => nodeToHTML(child, indent + '  '))
+        .join('\n');
+    }
+    
+    if (children) {
+      return `${indent}<div class="${className}">\n${children}\n${indent}</div>`;
+    } else {
+      return `${indent}<div class="${className}"></div>`;
+    }
+  }
+  
+  return `${indent}<!-- ${node.type} not supported -->`;
+}
+
 function generateVueCode(node: SceneNode): string {
   const name = node.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'component';
+  const html = nodeToHTML(node);
+  
   return `<template>
-  <div class="${name}">
-    <!-- Add your content here -->
-  </div>
+${html}
 </template>
 
 <script setup lang="ts">
@@ -1595,14 +1662,14 @@ function generateVueCode(node: SceneNode): string {
 </script>
 
 <style scoped>
-.${name} {
-  /* Add your styles here */
-}
+/* Add your styles here */
 </style>`;
 }
 
 function generateHTMLCode(node: SceneNode): string {
   const name = node.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'component';
+  const html = nodeToHTML(node, '  ');
+  
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1610,15 +1677,11 @@ function generateHTMLCode(node: SceneNode): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${node.name}</title>
   <style>
-    .${name} {
-      /* Add your styles here */
-    }
+    /* Add your styles here */
   </style>
 </head>
 <body>
-  <div class="${name}">
-    <!-- ${node.name} -->
-  </div>
+${html}
 </body>
 </html>`;
 }
