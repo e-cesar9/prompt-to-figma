@@ -436,8 +436,8 @@ function App() {
                 disabled={loading}
               >
                 <option value="">None (default colors)</option>
-                {availableSystems.map(sys => (
-                  <option key={sys.name} value={sys.name}>{sys.name}</option>
+                {availableSystems.map((sys, index) => (
+                  <option key={`${sys.name}-${index}`} value={sys.name}>{sys.name}</option>
                 ))}
               </select>
               <p className="hint">Choose a design system to use its colors, typography, and spacing</p>
