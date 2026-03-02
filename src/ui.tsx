@@ -15,10 +15,8 @@ function App() {
 
   // Load saved API key on mount
   useEffect(() => {
-    const savedKey = localStorage.getItem('designai_api_key') || '';
-    const savedProvider = (localStorage.getItem('designai_provider') as 'anthropic' | 'openai') || 'anthropic';
-    setApiKey(savedKey);
-    setAiProvider(savedProvider);
+    // Request saved settings from plugin backend
+    parent.postMessage({ pluginMessage: { type: 'get-settings' } }, '*');
   }, []);
 
   // Listen to messages from plugin backend
@@ -27,7 +25,11 @@ function App() {
       const msg = event.data.pluginMessage;
       if (!msg) return;
 
-      if (msg.type === 'loading') {
+      if (msg.type === 'settings') {
+        // Received saved settings
+        setApiKey(msg.apiKey || '');
+        setAiProvider(msg.provider || 'anthropic');
+      } else if (msg.type === 'loading') {
         setLoading(true);
         setMessage(msg.message);
         setMessageType('info');
@@ -50,8 +52,14 @@ function App() {
   }, []);
 
   const saveApiKey = () => {
-    localStorage.setItem('designai_api_key', apiKey);
-    localStorage.setItem('designai_provider', aiProvider);
+    // Send settings to plugin backend for storage
+    parent.postMessage({ 
+      pluginMessage: { 
+        type: 'save-settings',
+        apiKey,
+        provider: aiProvider
+      } 
+    }, '*');
     setMessage('API key saved! 🔐');
     setMessageType('success');
     setTimeout(() => setMessage(''), 2000);

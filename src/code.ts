@@ -1571,7 +1571,16 @@ function generateHTMLCode(node: SceneNode): string {
 
 // Message handlers
 figma.ui.onmessage = async (msg) => {
-  if (msg.type === 'generate-system') {
+  if (msg.type === 'get-settings') {
+    // Load saved settings from Figma clientStorage
+    const apiKey = await figma.clientStorage.getAsync('designai_api_key') || '';
+    const provider = await figma.clientStorage.getAsync('designai_provider') || 'anthropic';
+    figma.ui.postMessage({ type: 'settings', apiKey, provider });
+  } else if (msg.type === 'save-settings') {
+    // Save settings to Figma clientStorage
+    await figma.clientStorage.setAsync('designai_api_key', msg.apiKey);
+    await figma.clientStorage.setAsync('designai_provider', msg.provider);
+  } else if (msg.type === 'generate-system') {
     await generateDesignSystem(msg.brief, msg.apiKey, msg.provider || 'anthropic');
   } else if (msg.type === 'generate-screen') {
     await generateScreen(msg.prompt, msg.apiKey, msg.provider || 'anthropic');
