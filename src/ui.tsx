@@ -230,25 +230,25 @@ function App() {
           className={`tab ${activeTab === 'system' ? 'active' : ''}`}
           onClick={() => setActiveTab('system')}
         >
-          <Icon name="palette" size={18} /> System
+          System
         </button>
         <button
           className={`tab ${activeTab === 'screen' ? 'active' : ''}`}
           onClick={() => setActiveTab('screen')}
         >
-          <Icon name="smartphone" size={18} /> Screen
+          Screen
         </button>
         <button
           className={`tab ${activeTab === 'code' ? 'active' : ''}`}
           onClick={() => setActiveTab('code')}
         >
-          <Icon name="code" size={18} /> Code
+          Code
         </button>
         <button
           className={`tab ${activeTab === 'settings' ? 'active' : ''}`}
           onClick={() => setActiveTab('settings')}
         >
-          <Icon name="settings" size={18} /> Settings
+          Settings
         </button>
       </div>
 
@@ -268,19 +268,19 @@ function App() {
                   className={`provider-btn ${aiProvider === 'anthropic' ? 'active' : ''}`}
                   onClick={() => setAiProvider('anthropic')}
                 >
-                  <Icon name="brain" size={16} /> Sonnet 4.5
+                  Sonnet 4.5
                 </button>
                 <button
                   className={`provider-btn ${aiProvider === 'openai' ? 'active' : ''}`}
                   onClick={() => setAiProvider('openai')}
                 >
-                  <Icon name="zap" size={16} /> GPT-5.2
+                  GPT-5.2
                 </button>
                 <button
                   className={`provider-btn ${aiProvider === 'deepseek' ? 'active' : ''}`}
                   onClick={() => setAiProvider('deepseek')}
                 >
-                  <Icon name="brain" size={16} /> DeepSeek R1
+                  DeepSeek R1
                 </button>
               </div>
             </div>
@@ -514,7 +514,7 @@ function App() {
       {/* Footer */}
       <footer className="footer">
         <p className="footer-text">
-          <Icon name="sparkles" size={14} /> Prompt to Design, to Code • <span className="badge">v2.0</span> • Design, generated, coded.
+          Prompt to Design, to Code • <span className="badge">v2.0</span> • Design, generated, coded.
         </p>
       </footer>
     </div>
