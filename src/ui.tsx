@@ -79,6 +79,11 @@ const Icon = ({ name, size = 16 }: { name: string; size?: number }) => {
         <path d="M7 7h10l-1 9-4 1-4-1-0.3-3h2l0.1 1.5 2.2 0.7 2.2-0.7L16 11H8l-0.5-4h9"/>
       </svg>
     ),
+    loader: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+      </svg>
+    ),
   };
   
   return <span style={{ display: 'inline-flex', verticalAlign: 'middle', marginRight: '6px' }}>{icons[name] || icons.sparkles}</span>;
@@ -572,7 +577,9 @@ function App() {
       {message && (
         <div className={`message ${messageType}`}>
           {loading && progressTotal === 0 && (
-            <div className="splinter" title="Splinter is thinking...">🐀</div>
+            <div className="spinner">
+              <Icon name="loader" size={16} />
+            </div>
           )}
           <div className="message-text">{message}</div>
           {progressTotal > 0 && (
