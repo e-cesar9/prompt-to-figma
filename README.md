@@ -47,25 +47,25 @@ cd /home/clawd/projects/figma-designai
 npm install
 ```
 
-2. **Setup API Key**
-```bash
-# Copy env file
-cp .env.example .env
-
-# Edit .env and add your Anthropic API key
-nano .env
-```
-
-3. **Build Plugin**
+2. **Build Plugin**
 ```bash
 npm run build
 ```
 
-4. **Load in Figma**
+3. **Load in Figma**
 - Open Figma desktop app
 - Go to: `Plugins` → `Development` → `Import plugin from manifest...`
 - Select `manifest.json` from this folder
 - Plugin appears in your plugins menu!
+
+4. **Configure API Key**
+- Open the plugin in Figma
+- Go to **⚙️ Settings** tab
+- Choose your AI provider:
+  - **🧠 Claude (Anthropic)** - Get key at [console.anthropic.com](https://console.anthropic.com)
+  - **🤖 GPT-4 (OpenAI)** - Get key at [platform.openai.com](https://platform.openai.com)
+- Paste your API key
+- Click **💾 Save Settings**
 
 ---
 
@@ -151,13 +151,18 @@ figma-designai/
 
 ### API Keys
 
-The plugin uses your Anthropic API key to generate designs. Store it in `.env`:
+The plugin supports **both Anthropic Claude and OpenAI GPT-4**.
 
-```bash
-ANTHROPIC_API_KEY=sk-ant-your-key-here
-```
+**Configuration:**
+1. Open the plugin in Figma
+2. Go to **⚙️ Settings** tab
+3. Select your AI provider (Anthropic or OpenAI)
+4. Enter your API key
+5. Click **💾 Save Settings**
 
-**Note:** For MVP, the key is hardcoded in the build. For production, use a backend API.
+Your API key is stored securely in Figma's localStorage (persists between sessions).
+
+**Note:** For production use, consider implementing a backend API proxy to avoid exposing keys client-side.
 
 ### Customization
 
