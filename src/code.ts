@@ -191,8 +191,13 @@ Make the colors appropriate and harmonious for the brief. Be creative but profes
 }
 
 // Create Figma design system from tokens
+// Helper: Small delay for progressive creation effect
+function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function createFigmaDesignSystem(tokens: DesignTokens, brief: string) {
-  figma.ui.postMessage({ type: 'loading', message: 'Loading fonts...' });
+  figma.ui.postMessage({ type: 'progress', message: '⏳ Loading fonts...', step: 0, total: 7 });
   
   // Load fonts first
   await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
@@ -208,57 +213,65 @@ async function createFigmaDesignSystem(tokens: DesignTokens, brief: string) {
   const sectionGap = 100;
 
   // === 1. COLORS SECTION ===
-  figma.ui.postMessage({ type: 'loading', message: 'Creating colors...' });
+  figma.ui.postMessage({ type: 'progress', message: '🎨 Creating color palettes...', step: 1, total: 7 });
   const colorsFrame = await createColorsSection(tokens);
   colorsFrame.x = xOffset;
   colorsFrame.y = 0;
   page.appendChild(colorsFrame);
+  figma.viewport.scrollAndZoomIntoView([colorsFrame]); // Show it immediately
+  await delay(300); // Small delay for visual effect
   xOffset += colorsFrame.width + sectionGap;
 
   // === 2. TYPOGRAPHY SECTION ===
-  figma.ui.postMessage({ type: 'loading', message: 'Creating typography...' });
+  figma.ui.postMessage({ type: 'progress', message: '📝 Creating typography scale...', step: 2, total: 7 });
   const typoFrame = await createTypographySection(tokens);
   typoFrame.x = xOffset;
   typoFrame.y = 0;
   page.appendChild(typoFrame);
+  await delay(300);
   xOffset += typoFrame.width + sectionGap;
 
   // === 3. SPACING SECTION ===
-  figma.ui.postMessage({ type: 'loading', message: 'Creating spacing...' });
+  figma.ui.postMessage({ type: 'progress', message: '📐 Creating spacing system...', step: 3, total: 7 });
   const spacingFrame = await createSpacingSection(tokens);
   spacingFrame.x = xOffset;
   spacingFrame.y = 0;
   page.appendChild(spacingFrame);
+  await delay(300);
   xOffset += spacingFrame.width + sectionGap;
 
   // === 4. SHADOWS SECTION ===
-  figma.ui.postMessage({ type: 'loading', message: 'Creating shadows...' });
+  figma.ui.postMessage({ type: 'progress', message: '🌑 Creating shadow styles...', step: 4, total: 7 });
   const shadowsFrame = await createShadowsSection(tokens);
   shadowsFrame.x = xOffset;
   shadowsFrame.y = 0;
   page.appendChild(shadowsFrame);
+  await delay(300);
   xOffset += shadowsFrame.width + sectionGap;
 
   // === 5. COMPONENTS SECTION (Light Mode) ===
-  figma.ui.postMessage({ type: 'loading', message: 'Creating components...' });
+  figma.ui.postMessage({ type: 'progress', message: '🧩 Creating light mode components...', step: 5, total: 7 });
   const componentsFrame = await createComponentsSection(tokens, false);
   componentsFrame.x = 0;
   componentsFrame.y = 900;
   page.appendChild(componentsFrame);
+  await delay(500); // Longer delay for complex section
 
   // === 6. COMPONENTS SECTION (Dark Mode) ===
-  figma.ui.postMessage({ type: 'loading', message: 'Creating dark mode components...' });
+  figma.ui.postMessage({ type: 'progress', message: '🌙 Creating dark mode components...', step: 6, total: 7 });
   const darkComponentsFrame = await createComponentsSection(tokens, true);
   darkComponentsFrame.x = componentsFrame.width + sectionGap;
   darkComponentsFrame.y = 900;
   page.appendChild(darkComponentsFrame);
+  await delay(500);
 
   // === 7. ICONS PLACEHOLDER ===
-  figma.ui.postMessage({ type: 'loading', message: 'Creating icons section...' });
+  figma.ui.postMessage({ type: 'progress', message: '🎯 Creating icons section...', step: 7, total: 7 });
   const iconsFrame = await createIconsSection(tokens);
   iconsFrame.x = 0;
   iconsFrame.y = 2200;
   page.appendChild(iconsFrame);
+  await delay(200);
 
   figma.viewport.scrollAndZoomIntoView([colorsFrame]);
 }

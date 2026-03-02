@@ -12,6 +12,8 @@ function App() {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error' | 'info'>('info');
   const [generatedCode, setGeneratedCode] = useState('');
+  const [progressStep, setProgressStep] = useState(0);
+  const [progressTotal, setProgressTotal] = useState(0);
 
   // Load saved API key on mount
   useEffect(() => {
@@ -29,19 +31,32 @@ function App() {
         // Received saved settings
         setApiKey(msg.apiKey || '');
         setAiProvider(msg.provider || 'anthropic');
+      } else if (msg.type === 'progress') {
+        // Progressive creation updates
+        setLoading(true);
+        setMessage(msg.message);
+        setMessageType('info');
+        setProgressStep(msg.step || 0);
+        setProgressTotal(msg.total || 0);
       } else if (msg.type === 'loading') {
         setLoading(true);
         setMessage(msg.message);
         setMessageType('info');
+        setProgressStep(0);
+        setProgressTotal(0);
       } else if (msg.type === 'success') {
         setLoading(false);
         setMessage(msg.message);
         setMessageType('success');
+        setProgressStep(0);
+        setProgressTotal(0);
         setTimeout(() => setMessage(''), 3000);
       } else if (msg.type === 'error') {
         setLoading(false);
         setMessage(`${msg.message}`);
         setMessageType('error');
+        setProgressStep(0);
+        setProgressTotal(0);
       } else if (msg.type === 'code-generated') {
         setLoading(false);
         setGeneratedCode(msg.code);
@@ -393,7 +408,18 @@ function App() {
       {/* Status Message */}
       {message && (
         <div className={`message ${messageType}`}>
-          {message}
+          <div className="message-text">{message}</div>
+          {progressTotal > 0 && (
+            <div className="progress-container">
+              <div className="progress-bar">
+                <div 
+                  className="progress-fill" 
+                  style={{ width: `${(progressStep / progressTotal) * 100}%` }}
+                />
+              </div>
+              <div className="progress-text">{progressStep} / {progressTotal}</div>
+            </div>
+          )}
         </div>
       )}
 
