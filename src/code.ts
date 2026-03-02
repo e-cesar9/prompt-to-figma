@@ -1569,12 +1569,13 @@ async function generateScreen(prompt: string, apiKey: string, provider: 'anthrop
     if (designSystemName) {
       const tokens = extractDesignTokens(designSystemName);
       if (tokens) {
+        const bgColor = (tokens.darkMode && tokens.darkMode.background) || '#FFFFFF';
         designSystemContext = `
 USE THIS DESIGN SYSTEM:
 - Primary color: ${tokens.colors.primary['500'] || '#3B82F6'}
 - Secondary color: ${tokens.colors.secondary['500'] || '#8B5CF6'}
 - Neutral color: ${tokens.colors.neutral['500'] || '#6B7280'}
-- Background: ${tokens.darkMode?.background || '#FFFFFF'}
+- Background: ${bgColor}
 - Font family: ${tokens.typography.fontFamily || 'Inter'}
 - Border radius: 8px
 
