@@ -207,7 +207,7 @@ async function createFigmaDesignSystem(tokens: DesignTokens, brief: string) {
 
   const page = figma.createPage();
   page.name = `🎨 Design System`;
-  figma.currentPage = page;
+  await figma.setCurrentPageAsync(page);
 
   let xOffset = 0;
   const sectionGap = 100;
@@ -1376,6 +1376,12 @@ async function generateScreen(prompt: string, apiKey: string, provider: 'anthrop
   try {
     const aiPrompt = `Generate a detailed mobile app screen layout for: "${prompt}"
 
+IMPORTANT RULES:
+1. Every button MUST have text inside it (create a separate TEXT element for button labels)
+2. Every input MUST have placeholder text
+3. All text content should be realistic and appropriate for the context
+4. Include all necessary UI elements (don't leave buttons, inputs, or labels empty)
+
 Output ONLY valid JSON (no markdown, no code blocks) with this structure:
 {
   "screenName": "ScreenName",
@@ -1398,25 +1404,55 @@ Output ONLY valid JSON (no markdown, no code blocks) with this structure:
       "name": "Title",
       "x": 24,
       "y": 60,
-      "text": "Title",
+      "text": "Welcome Back",
       "fontSize": 24,
       "fontWeight": 700,
       "color": "#FFFFFF"
     },
     {
       "type": "RECTANGLE",
-      "name": "Button",
+      "name": "EmailInput",
       "x": 24,
-      "y": 200,
+      "y": 150,
+      "width": 327,
+      "height": 48,
+      "color": "#F3F4F6",
+      "cornerRadius": 8
+    },
+    {
+      "type": "TEXT",
+      "name": "EmailPlaceholder",
+      "x": 36,
+      "y": 164,
+      "text": "Email address",
+      "fontSize": 14,
+      "fontWeight": 400,
+      "color": "#9CA3AF"
+    },
+    {
+      "type": "RECTANGLE",
+      "name": "LoginButton",
+      "x": 24,
+      "y": 250,
       "width": 327,
       "height": 48,
       "color": "#3B82F6",
       "cornerRadius": 8
+    },
+    {
+      "type": "TEXT",
+      "name": "LoginButtonText",
+      "x": 150,
+      "y": 264,
+      "text": "Sign In",
+      "fontSize": 16,
+      "fontWeight": 600,
+      "color": "#FFFFFF"
     }
   ]
 }
 
-Be detailed and create a realistic screen layout with proper spacing, hierarchy, and modern design principles.`;
+Create a complete, realistic screen with ALL necessary text elements. Every interactive element (button, input, etc.) should have visible text or placeholder content.`;
 
     const content = await callAI(aiPrompt, apiKey, provider);
     const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -1483,7 +1519,8 @@ async function createScreenFromSpec(spec: any) {
         textNode.name = element.name || 'Text';
         textNode.x = element.x || 0;
         textNode.y = element.y || 0;
-        textNode.characters = element.text || '';
+        // Ensure text has content (fallback to placeholder)
+        textNode.characters = element.text || element.name || 'Text';
         textNode.fontSize = element.fontSize || 16;
         textNode.fontName = {
           family: 'Inter',
