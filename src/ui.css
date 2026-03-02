@@ -15,9 +15,10 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Clash Display', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-family: 'Bebas Neue', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 .app {
