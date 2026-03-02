@@ -1438,6 +1438,8 @@ Be detailed and create a realistic screen layout with proper spacing, hierarchy,
 
 // Create screen from spec
 async function createScreenFromSpec(spec: any) {
+  figma.ui.postMessage({ type: 'progress', message: '⏳ Loading fonts...', step: 0, total: (spec.elements?.length || 0) + 1 });
+  
   await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
   await figma.loadFontAsync({ family: 'Inter', style: 'Medium' });
   await figma.loadFontAsync({ family: 'Inter', style: 'Semi Bold' });
@@ -1448,7 +1450,21 @@ async function createScreenFromSpec(spec: any) {
   frame.resize(spec.width || 375, spec.height || 812);
   frame.fills = [{ type: 'SOLID', color: hexToRgb(spec.backgroundColor || '#FFFFFF') }];
 
+  figma.currentPage.appendChild(frame);
+  figma.viewport.scrollAndZoomIntoView([frame]);
+  
+  const totalElements = spec.elements?.length || 0;
+  let currentElement = 0;
+
   for (const element of (spec.elements || [])) {
+    currentElement++;
+    const elementName = element.name || element.type;
+    figma.ui.postMessage({ 
+      type: 'progress', 
+      message: `📱 Creating ${elementName}...`, 
+      step: currentElement, 
+      total: totalElements 
+    });
     try {
       if (element.type === 'FRAME') {
         const childFrame = figma.createFrame();
@@ -1495,6 +1511,9 @@ async function createScreenFromSpec(spec: any) {
     } catch (e) {
       console.error('Error creating element:', element, e);
     }
+    
+    // Delay between elements for progressive creation effect
+    await delay(800);
   }
 
   figma.viewport.scrollAndZoomIntoView([frame]);
