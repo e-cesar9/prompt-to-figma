@@ -230,24 +230,28 @@ function App() {
           className={`tab ${activeTab === 'system' ? 'active' : ''}`}
           onClick={() => setActiveTab('system')}
         >
+          <Icon name="palette" size={16} />
           System
         </button>
         <button
           className={`tab ${activeTab === 'screen' ? 'active' : ''}`}
           onClick={() => setActiveTab('screen')}
         >
+          <Icon name="smartphone" size={16} />
           Screen
         </button>
         <button
           className={`tab ${activeTab === 'code' ? 'active' : ''}`}
           onClick={() => setActiveTab('code')}
         >
+          <Icon name="code" size={16} />
           Code
         </button>
         <button
           className={`tab ${activeTab === 'settings' ? 'active' : ''}`}
           onClick={() => setActiveTab('settings')}
         >
+          <Icon name="settings" size={16} />
           Settings
         </button>
       </div>
@@ -268,18 +272,21 @@ function App() {
                   className={`provider-btn ${aiProvider === 'anthropic' ? 'active' : ''}`}
                   onClick={() => setAiProvider('anthropic')}
                 >
+                  <Icon name="brain" size={14} />
                   Sonnet 4.5
                 </button>
                 <button
                   className={`provider-btn ${aiProvider === 'openai' ? 'active' : ''}`}
                   onClick={() => setAiProvider('openai')}
                 >
+                  <Icon name="zap" size={14} />
                   GPT-5.2
                 </button>
                 <button
                   className={`provider-btn ${aiProvider === 'deepseek' ? 'active' : ''}`}
                   onClick={() => setAiProvider('deepseek')}
                 >
+                  <Icon name="brain" size={14} />
                   DeepSeek R1
                 </button>
               </div>
