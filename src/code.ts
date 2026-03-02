@@ -652,16 +652,16 @@ async function createComponentsSection(tokens: DesignTokens, isDarkMode: boolean
   frame.paddingLeft = frame.paddingRight = frame.paddingTop = frame.paddingBottom = 48;
   
   const bgColor = isDarkMode 
-    ? hexToRgb(tokens.darkMode?.background || '#0F172A')
+    ? hexToRgb((tokens.darkMode && tokens.darkMode.background) || '#0F172A')
     : { r: 1, g: 1, b: 1 };
   const textColor = isDarkMode
-    ? hexToRgb(tokens.darkMode?.text || '#F8FAFC')
+    ? hexToRgb((tokens.darkMode && tokens.darkMode.text) || '#F8FAFC')
     : { r: 0.1, g: 0.1, b: 0.1 };
   const textSecondaryColor = isDarkMode
-    ? hexToRgb(tokens.darkMode?.textSecondary || '#94A3B8')
+    ? hexToRgb((tokens.darkMode && tokens.darkMode.textSecondary) || '#94A3B8')
     : { r: 0.5, g: 0.5, b: 0.5 };
   const surfaceColor = isDarkMode
-    ? hexToRgb(tokens.darkMode?.surface || '#1E293B')
+    ? hexToRgb((tokens.darkMode && tokens.darkMode.surface) || '#1E293B')
     : { r: 1, g: 1, b: 1 };
     
   frame.fills = [{ type: 'SOLID', color: bgColor }];
@@ -990,7 +990,7 @@ function createInput(tokens: DesignTokens, placeholder: string, state: 'default'
   input.paddingTop = input.paddingBottom = 12;
   
   const bgColor = isDarkMode 
-    ? hexToRgb(tokens.darkMode?.surface || '#1E293B')
+    ? hexToRgb((tokens.darkMode && tokens.darkMode.surface) || '#1E293B')
     : { r: 1, g: 1, b: 1 };
   input.fills = [{ type: 'SOLID', color: bgColor }];
   
@@ -1031,7 +1031,7 @@ function createCard(tokens: DesignTokens, title: string, isDarkMode: boolean, el
   card.cornerRadius = 16;
 
   const bgColor = isDarkMode 
-    ? hexToRgb(tokens.darkMode?.surface || '#1E293B')
+    ? hexToRgb((tokens.darkMode && tokens.darkMode.surface) || '#1E293B')
     : { r: 1, g: 1, b: 1 };
   card.fills = [{ type: 'SOLID', color: bgColor }];
 
@@ -1046,12 +1046,12 @@ function createCard(tokens: DesignTokens, title: string, isDarkMode: boolean, el
       blendMode: 'NORMAL'
     }];
   } else {
-    card.strokes = [{ type: 'SOLID', color: hexToRgb(isDarkMode ? (tokens.darkMode?.border || '#334155') : (tokens.colors.neutral['200'] || '#E5E7EB')) }];
+    card.strokes = [{ type: 'SOLID', color: hexToRgb(isDarkMode ? ((tokens.darkMode && tokens.darkMode.border) || '#334155') : (tokens.colors.neutral['200'] || '#E5E7EB')) }];
     card.strokeWeight = 1;
   }
 
   const textColor = isDarkMode 
-    ? hexToRgb(tokens.darkMode?.text || '#F8FAFC')
+    ? hexToRgb((tokens.darkMode && tokens.darkMode.text) || '#F8FAFC')
     : { r: 0.1, g: 0.1, b: 0.1 };
 
   const cardTitle = figma.createText();
@@ -1064,7 +1064,7 @@ function createCard(tokens: DesignTokens, title: string, isDarkMode: boolean, el
   cardBody.characters = 'Card description text goes here. This component can be customized.';
   cardBody.fontSize = 14;
   cardBody.fontName = { family: 'Inter', style: 'Regular' };
-  cardBody.fills = [{ type: 'SOLID', color: isDarkMode ? hexToRgb(tokens.darkMode?.textSecondary || '#94A3B8') : { r: 0.5, g: 0.5, b: 0.5 } }];
+  cardBody.fills = [{ type: 'SOLID', color: isDarkMode ? hexToRgb((tokens.darkMode && tokens.darkMode.textSecondary) || '#94A3B8') : { r: 0.5, g: 0.5, b: 0.5 } }];
   cardBody.resize(250, cardBody.height);
   cardBody.textAutoResize = 'HEIGHT';
 
@@ -1197,7 +1197,7 @@ function createCheckbox(tokens: DesignTokens, isChecked: boolean, isDarkMode: bo
     checkbox.counterAxisAlignItems = 'CENTER';
     checkbox.appendChild(check);
   } else {
-    checkbox.fills = [{ type: 'SOLID', color: isDarkMode ? hexToRgb(tokens.darkMode?.surface || '#1E293B') : { r: 1, g: 1, b: 1 } }];
+    checkbox.fills = [{ type: 'SOLID', color: isDarkMode ? hexToRgb((tokens.darkMode && tokens.darkMode.surface) || '#1E293B') : { r: 1, g: 1, b: 1 } }];
     checkbox.strokes = [{ type: 'SOLID', color: hexToRgb(tokens.colors.neutral['300'] || '#D1D5DB') }];
     checkbox.strokeWeight = 2;
   }
