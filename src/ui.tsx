@@ -99,6 +99,7 @@ function App() {
   const [progressTotal, setProgressTotal] = useState(0);
   const [availableSystems, setAvailableSystems] = useState<Array<{name: string}>>([]);
   const [selectedSystem, setSelectedSystem] = useState('');
+  const [screenFormat, setScreenFormat] = useState<'mobile' | 'tablet' | 'desktop'>('mobile');
 
   // Load saved API key and design systems on mount
   useEffect(() => {
@@ -223,7 +224,8 @@ function App() {
         prompt: screenPrompt,
         apiKey,
         provider: aiProvider,
-        designSystem: selectedSystem || null
+        designSystem: selectedSystem || null,
+        format: screenFormat
       } 
     }, '*');
   };
@@ -441,6 +443,20 @@ function App() {
                 ))}
               </select>
               <p className="hint">Choose a design system to use its colors, typography, and spacing</p>
+            </div>
+
+            <div className="form-group">
+              <label className="label">Screen Format</label>
+              <select 
+                className="select" 
+                value={screenFormat} 
+                onChange={(e) => setScreenFormat(e.target.value as 'mobile' | 'tablet' | 'desktop')}
+                disabled={loading}
+              >
+                <option value="mobile">📱 Mobile (375x812)</option>
+                <option value="tablet">📲 Tablet (768x1024)</option>
+                <option value="desktop">🖥️ Desktop (1440x900)</option>
+              </select>
             </div>
 
             <textarea

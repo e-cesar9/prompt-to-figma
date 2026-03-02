@@ -1560,8 +1560,185 @@ async function createIconsSection(tokens: DesignTokens): Promise<FrameNode> {
 }
 
 // Generate screen from text
-async function generateScreen(prompt: string, apiKey: string, provider: 'anthropic' | 'openai', designSystemName?: string | null) {
+// Stream AI response and create elements in real-time
+async function streamGenerateAndCreate(prompt: string, apiKey: string, provider: 'anthropic' | 'openai', dimensions: {width: number, height: number}) {
+  let buffer = '';
+  let frame: FrameNode | null = null;
+  let elementsCreated = 0;
+  
+  figma.ui.postMessage({ type: 'progress', message: '⏳ Loading fonts...', step: 0, total: 1 });
+  
+  await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
+  await figma.loadFontAsync({ family: 'Inter', style: 'Medium' });
+  await figma.loadFontAsync({ family: 'Inter', style: 'Semi Bold' });
+  await figma.loadFontAsync({ family: 'Inter', style: 'Bold' });
+
+  if (provider === 'anthropic') {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5-20241022',
+        max_tokens: 8192,
+        messages: [{ role: 'user', content: prompt }],
+        stream: true,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) throw new Error('No reader');
+
+    const decoder = new TextDecoder();
+    
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value);
+      const lines = chunk.split('\n');
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6);
+          if (data === '[DONE]') continue;
+          
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.type === 'content_block_delta' && parsed.delta?.text) {
+              buffer += parsed.delta.text;
+              
+              // Try to parse and create elements as they come in
+              const jsonMatch = buffer.match(/\{[\s\S]*"elements"\s*:\s*\[([\s\S]*?)\]/);
+              if (jsonMatch) {
+                // Extract basic info first
+                const screenMatch = buffer.match(/"screenName"\s*:\s*"([^"]+)"/);
+                const widthMatch = buffer.match(/"width"\s*:\s*(\d+)/);
+                const heightMatch = buffer.match(/"height"\s*:\s*(\d+)/);
+                const bgMatch = buffer.match(/"backgroundColor"\s*:\s*"([^"]+)"/);
+                
+                if (!frame && screenMatch && widthMatch && heightMatch) {
+                  // Create frame
+                  frame = figma.createFrame();
+                  frame.name = screenMatch[1];
+                  frame.resize(parseInt(widthMatch[1]), parseInt(heightMatch[1]));
+                  if (bgMatch) {
+                    frame.fills = [{ type: 'SOLID', color: hexToRgb(bgMatch[1]) }];
+                  }
+                  figma.currentPage.appendChild(frame);
+                  figma.viewport.scrollAndZoomIntoView([frame]);
+                }
+                
+                // Try to extract complete elements
+                const elementsStr = jsonMatch[1];
+                const elementMatches = elementsStr.match(/\{[^}]+\}/g);
+                
+                if (elementMatches && frame) {
+                  for (let i = elementsCreated; i < elementMatches.length; i++) {
+                    try {
+                      const elementStr = elementMatches[i];
+                      // Check if element is complete (has closing brace)
+                      if (!elementStr.endsWith('}')) continue;
+                      
+                      const element = JSON.parse(elementStr);
+                      await createElement(frame, element);
+                      elementsCreated++;
+                      
+                      figma.ui.postMessage({ 
+                        type: 'progress', 
+                        message: `📱 Creating ${element.name || element.type}...`, 
+                        step: elementsCreated, 
+                        total: elementsCreated + 1
+                      });
+                      
+                      await delay(100); // Small delay for visual feedback
+                    } catch (e) {
+                      // Element not complete yet, continue
+                    }
+                  }
+                }
+              }
+            }
+          } catch (e) {
+            // JSON parse error, continue accumulating
+          }
+        }
+      }
+    }
+  } else {
+    // Fallback for non-streaming providers
+    const content = await callAI(prompt, apiKey, provider);
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Could not parse screen spec');
+    const spec = JSON.parse(jsonMatch[0]);
+    await createScreenFromSpec(spec);
+  }
+}
+
+// Helper to create a single element
+async function createElement(frame: FrameNode, element: any) {
+  try {
+    if (element.type === 'FRAME') {
+      const childFrame = figma.createFrame();
+      childFrame.name = element.name || 'Frame';
+      childFrame.x = element.x || 0;
+      childFrame.y = element.y || 0;
+      childFrame.resize(element.width || 100, element.height || 100);
+      if (element.color) {
+        childFrame.fills = [{ type: 'SOLID', color: hexToRgb(element.color) }];
+      }
+      if (element.cornerRadius) {
+        childFrame.cornerRadius = element.cornerRadius;
+      }
+      frame.appendChild(childFrame);
+    } else if (element.type === 'TEXT') {
+      const textNode = figma.createText();
+      textNode.name = element.name || 'Text';
+      textNode.x = element.x || 0;
+      textNode.y = element.y || 0;
+      textNode.characters = element.text || element.name || 'Text';
+      textNode.fontSize = element.fontSize || 16;
+      textNode.fontName = {
+        family: 'Inter',
+        style: (element.fontWeight || 400) >= 700 ? 'Bold' : (element.fontWeight || 400) >= 600 ? 'Semi Bold' : 'Regular',
+      };
+      if (element.color) {
+        textNode.fills = [{ type: 'SOLID', color: hexToRgb(element.color) }];
+      }
+      frame.appendChild(textNode);
+    } else if (element.type === 'RECTANGLE') {
+      const rect = figma.createRectangle();
+      rect.name = element.name || 'Rectangle';
+      rect.x = element.x || 0;
+      rect.y = element.y || 0;
+      rect.resize(element.width || 100, element.height || 100);
+      if (element.color) {
+        rect.fills = [{ type: 'SOLID', color: hexToRgb(element.color) }];
+      }
+      if (element.cornerRadius) {
+        rect.cornerRadius = element.cornerRadius;
+      }
+      frame.appendChild(rect);
+    }
+  } catch (e) {
+    console.error('Error creating element:', element, e);
+  }
+}
+
+async function generateScreen(prompt: string, apiKey: string, provider: 'anthropic' | 'openai', designSystemName?: string | null, format: 'mobile' | 'tablet' | 'desktop' = 'mobile') {
   figma.ui.postMessage({ type: 'loading', message: 'Generating screen layout...' });
+
+  // Get dimensions based on format
+  const dimensions = format === 'mobile' ? { width: 375, height: 812 } :
+                     format === 'tablet' ? { width: 768, height: 1024 } :
+                     { width: 1440, height: 900 };
 
   try {
     // Extract design tokens if a design system is selected
@@ -1584,7 +1761,8 @@ Apply these colors and styles to all elements in the screen.
       }
     }
 
-    const aiPrompt = `${designSystemContext}Generate a detailed mobile app screen layout for: "${prompt}"
+    const screenType = format === 'mobile' ? 'mobile app' : format === 'tablet' ? 'tablet' : 'desktop web';
+    const aiPrompt = `${designSystemContext}Generate a detailed ${screenType} screen layout for: "${prompt}"
 
 IMPORTANT RULES:
 1. Every button MUST have text inside it (create a separate TEXT element for button labels)
@@ -1595,8 +1773,8 @@ IMPORTANT RULES:
 Output ONLY valid JSON (no markdown, no code blocks) with this structure:
 {
   "screenName": "ScreenName",
-  "width": 375,
-  "height": 812,
+  "width": ${dimensions.width},
+  "height": ${dimensions.height},
   "backgroundColor": "#FFFFFF",
   "elements": [
     {
@@ -1604,7 +1782,7 @@ Output ONLY valid JSON (no markdown, no code blocks) with this structure:
       "name": "Header",
       "x": 0,
       "y": 0,
-      "width": 375,
+      "width": ${dimensions.width},
       "height": 100,
       "color": "#3B82F6",
       "cornerRadius": 0
@@ -1664,15 +1842,8 @@ Output ONLY valid JSON (no markdown, no code blocks) with this structure:
 
 Create a complete, realistic screen with ALL necessary text elements. Every interactive element (button, input, etc.) should have visible text or placeholder content.`;
 
-    const content = await callAI(aiPrompt, apiKey, provider);
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-
-    if (!jsonMatch) {
-      throw new Error('Could not parse screen spec');
-    }
-
-    const spec = JSON.parse(jsonMatch[0]);
-    await createScreenFromSpec(spec);
+    // Use streaming to create elements in real-time
+    await streamGenerateAndCreate(aiPrompt, apiKey, provider, dimensions);
 
     figma.ui.postMessage({ type: 'success', message: 'Screen created! 🎨' });
   } catch (error: any) {
@@ -2337,7 +2508,7 @@ figma.ui.onmessage = async (msg) => {
   } else if (msg.type === 'generate-system') {
     await generateDesignSystem(msg.brief, msg.apiKey, msg.provider || 'anthropic');
   } else if (msg.type === 'generate-screen') {
-    await generateScreen(msg.prompt, msg.apiKey, msg.provider || 'anthropic', msg.designSystem);
+    await generateScreen(msg.prompt, msg.apiKey, msg.provider || 'anthropic', msg.designSystem, msg.format || 'mobile');
   } else if (msg.type === 'export-code') {
     await exportToCode(msg.format);
   } else if (msg.type === 'cancel') {
