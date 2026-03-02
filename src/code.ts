@@ -1530,7 +1530,8 @@ function extractNodeStructure(node: SceneNode, nodeMap: Map<string, any> = new M
     const textNode = node as TextNode;
     data.text = textNode.characters;
     data.fontSize = textNode.fontSize;
-    data.fontWeight = (textNode.fontName as FontName).style?.includes('Bold') ? 700 : 400;
+    const fontName = textNode.fontName as FontName;
+    data.fontWeight = fontName && fontName.style && fontName.style.includes('Bold') ? 700 : 400;
   }
 
   if (node.type === 'FRAME' || node.type === 'RECTANGLE' || node.type === 'COMPONENT' || node.type === 'INSTANCE') {
