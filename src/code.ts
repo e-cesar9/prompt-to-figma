@@ -396,51 +396,54 @@ async function createFigmaDesignSystem(tokens: DesignTokens, brief: string) {
   page.name = `🎨 Design System`;
   await figma.setCurrentPageAsync(page);
 
-  let xOffset = 0;
-  const sectionGap = 100;
+  const sectionGap = 200; // Increased gap between sections
 
   // === 1. COLORS SECTION ===
   figma.ui.postMessage({ type: 'progress', message: '🎨 Creating color palettes...', step: 1, total: 7 });
   const colorsFrame = await createColorsSection(tokens);
-  colorsFrame.x = xOffset;
+  colorsFrame.x = 0;
   colorsFrame.y = 0;
   page.appendChild(colorsFrame);
-  figma.viewport.scrollAndZoomIntoView([colorsFrame]); // Show it immediately
+  figma.viewport.scrollAndZoomIntoView([colorsFrame]);
   await delay(300);
-  xOffset += colorsFrame.width + sectionGap;
 
   // === 2. TYPOGRAPHY SECTION ===
   figma.ui.postMessage({ type: 'progress', message: '📝 Creating typography scale...', step: 2, total: 7 });
   const typoFrame = await createTypographySection(tokens);
-  typoFrame.x = xOffset;
-  typoFrame.y = 0;
+  typoFrame.x = 0;
+  typoFrame.y = colorsFrame.height + sectionGap; // Stack vertically
   page.appendChild(typoFrame);
   await delay(300);
-  xOffset += typoFrame.width + sectionGap;
 
   // === 3. SPACING SECTION ===
   figma.ui.postMessage({ type: 'progress', message: '📐 Creating spacing system...', step: 3, total: 7 });
   const spacingFrame = await createSpacingSection(tokens);
-  spacingFrame.x = xOffset;
-  spacingFrame.y = 0;
+  spacingFrame.x = 0;
+  spacingFrame.y = typoFrame.y + typoFrame.height + sectionGap;
   page.appendChild(spacingFrame);
   await delay(300);
-  xOffset += spacingFrame.width + sectionGap;
 
   // === 4. SHADOWS SECTION ===
   figma.ui.postMessage({ type: 'progress', message: '🌑 Creating shadow styles...', step: 4, total: 7 });
   const shadowsFrame = await createShadowsSection(tokens);
-  shadowsFrame.x = xOffset;
-  shadowsFrame.y = 0;
+  shadowsFrame.x = 0;
+  shadowsFrame.y = spacingFrame.y + spacingFrame.height + sectionGap;
   page.appendChild(shadowsFrame);
   await delay(300);
-  xOffset += shadowsFrame.width + sectionGap;
+
+  // Calculate max height for top sections
+  const topSectionsMaxHeight = Math.max(
+    colorsFrame.height,
+    typoFrame.y + typoFrame.height,
+    spacingFrame.y + spacingFrame.height,
+    shadowsFrame.y + shadowsFrame.height
+  );
 
   // === 5. COMPONENTS SECTION (Light Mode) ===
   figma.ui.postMessage({ type: 'progress', message: '🧩 Creating light mode components...', step: 5, total: 7 });
   const componentsFrame = await createComponentsSection(tokens, false);
   componentsFrame.x = 0;
-  componentsFrame.y = 900;
+  componentsFrame.y = topSectionsMaxHeight + sectionGap * 2;
   page.appendChild(componentsFrame);
   await delay(500);
 
@@ -448,7 +451,7 @@ async function createFigmaDesignSystem(tokens: DesignTokens, brief: string) {
   figma.ui.postMessage({ type: 'progress', message: '🌙 Creating dark mode components...', step: 6, total: 7 });
   const darkComponentsFrame = await createComponentsSection(tokens, true);
   darkComponentsFrame.x = componentsFrame.width + sectionGap;
-  darkComponentsFrame.y = 900;
+  darkComponentsFrame.y = topSectionsMaxHeight + sectionGap * 2;
   page.appendChild(darkComponentsFrame);
   await delay(500);
 
@@ -456,7 +459,7 @@ async function createFigmaDesignSystem(tokens: DesignTokens, brief: string) {
   figma.ui.postMessage({ type: 'progress', message: '🎯 Creating icons section...', step: 7, total: 7 });
   const iconsFrame = await createIconsSection(tokens);
   iconsFrame.x = 0;
-  iconsFrame.y = 2200;
+  iconsFrame.y = componentsFrame.y + Math.max(componentsFrame.height, darkComponentsFrame.height) + sectionGap * 2;
   page.appendChild(iconsFrame);
   await delay(200);
 
