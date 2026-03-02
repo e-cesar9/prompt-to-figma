@@ -52,7 +52,7 @@ h1, h2, h3, h4, h5, h6 {
 .tabs {
   display: flex;
   gap: 0;
-  padding: 0 20px;
+  padding: 0;
   background: hsl(0 0% 100%);
   border-bottom: 1px solid hsl(240 5.9% 90%);
   position: relative;
@@ -88,8 +88,8 @@ h1, h2, h3, h4, h5, h6 {
 .tab-indicator {
   position: absolute;
   bottom: -1px;
-  left: 20px;
-  width: calc((100% - 40px) / 4);
+  left: 0;
+  width: 25%;
   height: 2px;
   background: hsl(240 10% 3.9%);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
