@@ -5,11 +5,11 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
-  font-size: 15px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, sans-serif;
+  font-size: 14px;
   line-height: 1.5;
-  color: #000;
-  background: #fff;
+  color: hsl(240 10% 3.9%);
+  background: hsl(0 0% 100%);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -18,53 +18,51 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: #fff;
+  background: hsl(0 0% 100%);
 }
 
-/* Header - Minimal & Bold */
+/* Header - shadcn style */
 .header {
-  padding: 24px 24px 20px;
-  background: #fff;
-  border-bottom: 1px solid #e5e5e5;
-  text-align: left;
+  padding: 20px 24px 16px;
+  background: hsl(0 0% 100%);
+  border-bottom: 1px solid hsl(240 5.9% 90%);
 }
 
 .header h1 {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 600;
-  margin-bottom: 4px;
-  letter-spacing: -0.3px;
-  color: #000;
+  margin-bottom: 2px;
+  letter-spacing: -0.2px;
+  color: hsl(240 10% 3.9%);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .subtitle {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 400;
-  color: #666;
-  letter-spacing: 0px;
+  color: hsl(240 3.8% 46.1%);
 }
 
-/* Tabs - Clean */
+/* Tabs - shadcn style */
 .tabs {
   display: flex;
   gap: 0;
-  padding: 0 16px;
-  background: #fff;
-  border-bottom: 1px solid #e5e5e5;
+  padding: 0 20px;
+  background: hsl(0 0% 100%);
+  border-bottom: 1px solid hsl(240 5.9% 90%);
 }
 
 .tab {
   flex: 1;
-  padding: 12px 16px;
+  padding: 10px 14px;
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  color: #666;
+  color: hsl(240 3.8% 46.1%);
   cursor: pointer;
   transition: all 0.15s ease;
   display: flex;
@@ -74,13 +72,12 @@ body {
 }
 
 .tab:hover {
-  color: #000;
-  background: #fafafa;
+  color: hsl(240 10% 3.9%);
 }
 
 .tab.active {
-  color: #000;
-  border-bottom-color: #000;
+  color: hsl(240 10% 3.9%);
+  border-bottom-color: hsl(240 10% 3.9%);
   font-weight: 600;
 }
 
@@ -88,88 +85,90 @@ body {
 .content {
   flex: 1;
   overflow-y: auto;
-  padding: 32px 24px;
-  background: #fff;
+  padding: 24px;
+  background: hsl(0 0% 100%);
 }
 
 .section {
-  max-width: 580px;
+  max-width: 600px;
   margin: 0 auto;
 }
 
 .section h2 {
   font-size: 18px;
   font-weight: 600;
-  margin-bottom: 8px;
-  color: #000;
-  letter-spacing: -0.2px;
+  margin-bottom: 6px;
+  color: hsl(240 10% 3.9%);
+  letter-spacing: -0.3px;
 }
 
 .description {
   font-size: 14px;
-  color: #666;
+  color: hsl(240 3.8% 46.1%);
   margin-bottom: 24px;
   line-height: 1.5;
 }
 
-/* Form Elements */
+/* Form Elements - shadcn style */
 .form-group {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .label {
   display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: #000;
+  font-size: 14px;
+  font-weight: 500;
+  color: hsl(240 10% 3.9%);
   margin-bottom: 8px;
 }
 
 .input,
 .textarea {
   width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #d0d0d0;
+  padding: 8px 12px;
+  border: 1px solid hsl(240 5.9% 90%);
   border-radius: 6px;
   font-family: inherit;
   font-size: 14px;
-  color: #000;
-  background: #fff;
+  color: hsl(240 10% 3.9%);
+  background: hsl(0 0% 100%);
   transition: all 0.15s ease;
   outline: none;
 }
 
 .input:hover,
 .textarea:hover {
-  border-color: #999;
+  border-color: hsl(240 4.8% 70%);
 }
 
 .input:focus,
 .textarea:focus {
-  border-color: #000;
-  box-shadow: 0 0 0 1px #000;
+  border-color: hsl(240 10% 3.9%);
+  ring: 2px;
+  ring-color: hsl(240 5.9% 10% / 0.1);
 }
 
 .input:disabled,
 .textarea:disabled {
-  background: #f5f5f5;
-  color: #999;
+  background: hsl(240 4.8% 95.9%);
+  color: hsl(240 3.8% 46.1%);
   cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .textarea {
   resize: vertical;
-  min-height: 120px;
+  min-height: 100px;
   line-height: 1.5;
 }
 
-/* Buttons - Strong */
+/* Buttons - shadcn style */
 .button {
-  padding: 10px 20px;
-  border: 1px solid #000;
+  padding: 8px 16px;
+  border: 1px solid transparent;
   border-radius: 6px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
   display: inline-flex;
@@ -179,28 +178,24 @@ body {
 }
 
 .button.primary {
-  background: #000;
-  color: #fff;
-  border-color: #000;
+  background: hsl(240 10% 3.9%);
+  color: hsl(0 0% 98%);
 }
 
 .button.primary:hover {
-  background: #333;
-  border-color: #333;
+  background: hsl(240 10% 3.9% / 0.9);
 }
 
 .button.primary:active {
-  background: #000;
+  background: hsl(240 10% 3.9% / 0.95);
 }
 
 .button.primary:disabled {
-  background: #d0d0d0;
-  border-color: #d0d0d0;
-  color: #999;
+  background: hsl(240 10% 3.9% / 0.5);
   cursor: not-allowed;
 }
 
-/* Provider Selector */
+/* Provider Selector - shadcn style */
 .provider-selector {
   display: flex;
   gap: 8px;
@@ -208,13 +203,13 @@ body {
 
 .provider-btn {
   flex: 1;
-  padding: 10px 14px;
-  background: #fff;
-  border: 1px solid #d0d0d0;
+  padding: 8px 12px;
+  background: hsl(0 0% 100%);
+  border: 1px solid hsl(240 5.9% 90%);
   border-radius: 6px;
   font-size: 13px;
   font-weight: 500;
-  color: #666;
+  color: hsl(240 3.8% 46.1%);
   cursor: pointer;
   transition: all 0.15s ease;
   display: flex;
@@ -224,40 +219,39 @@ body {
 }
 
 .provider-btn:hover {
-  border-color: #999;
-  background: #fafafa;
+  border-color: hsl(240 4.8% 70%);
+  background: hsl(240 4.8% 95.9%);
 }
 
 .provider-btn.active {
-  background: #000;
-  border-color: #000;
-  color: #fff;
-  font-weight: 600;
+  background: hsl(240 10% 3.9%);
+  border-color: hsl(240 10% 3.9%);
+  color: hsl(0 0% 98%);
 }
 
 /* Format/Radio Selector */
 .format-selector {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-bottom: 24px;
+  gap: 8px;
+  margin-bottom: 20px;
 }
 
 .radio-label {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 14px;
-  background: #fff;
-  border: 1px solid #d0d0d0;
+  padding: 10px 12px;
+  background: hsl(0 0% 100%);
+  border: 1px solid hsl(240 5.9% 90%);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .radio-label:hover {
-  border-color: #999;
-  background: #fafafa;
+  border-color: hsl(240 4.8% 70%);
+  background: hsl(240 4.8% 95.9%);
 }
 
 .radio-label input[type="radio"] {
@@ -265,34 +259,34 @@ body {
   height: 16px;
   margin: 0;
   cursor: pointer;
-  accent-color: #000;
+  accent-color: hsl(240 10% 3.9%);
 }
 
 .radio-label input[type="radio"]:checked + span {
   font-weight: 600;
-  color: #000;
+  color: hsl(240 10% 3.9%);
 }
 
 .radio-label span {
   font-size: 14px;
   font-weight: 500;
-  color: #666;
+  color: hsl(240 3.8% 46.1%);
   transition: all 0.15s ease;
 }
 
-/* Examples */
+/* Examples - shadcn card style */
 .examples {
-  margin-top: 24px;
-  padding: 20px;
-  background: #fafafa;
-  border: 1px solid #e5e5e5;
-  border-radius: 6px;
+  margin-top: 20px;
+  padding: 16px;
+  background: hsl(0 0% 100%);
+  border: 1px solid hsl(240 5.9% 90%);
+  border-radius: 8px;
 }
 
 .examples-title {
   font-size: 12px;
   font-weight: 600;
-  color: #666;
+  color: hsl(240 3.8% 46.1%);
   margin-bottom: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -300,31 +294,31 @@ body {
 
 .example-chip {
   display: inline-block;
-  padding: 6px 12px;
+  padding: 4px 10px;
   margin: 4px 4px 4px 0;
-  background: #fff;
-  border: 1px solid #d0d0d0;
-  border-radius: 4px;
+  background: hsl(240 4.8% 95.9%);
+  border: 1px solid hsl(240 5.9% 90%);
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 500;
-  color: #666;
+  color: hsl(240 10% 3.9%);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .example-chip:hover {
-  background: #000;
-  border-color: #000;
-  color: #fff;
+  background: hsl(240 10% 3.9%);
+  border-color: hsl(240 10% 3.9%);
+  color: hsl(0 0% 98%);
 }
 
 /* Code Output */
 .code-output {
-  margin-top: 24px;
-  border-radius: 6px;
+  margin-top: 20px;
+  border-radius: 8px;
   overflow: hidden;
-  border: 1px solid #d0d0d0;
-  background: #fff;
+  border: 1px solid hsl(240 5.9% 90%);
+  background: hsl(0 0% 100%);
 }
 
 .code-header {
@@ -332,22 +326,22 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 10px 14px;
-  background: #fafafa;
-  border-bottom: 1px solid #d0d0d0;
+  background: hsl(240 4.8% 95.9%);
+  border-bottom: 1px solid hsl(240 5.9% 90%);
 }
 
 .code-header span {
   font-size: 13px;
   font-weight: 600;
-  color: #000;
+  color: hsl(240 10% 3.9%);
 }
 
 .copy-button {
-  padding: 5px 12px;
-  background: #000;
-  color: #fff;
+  padding: 4px 12px;
+  background: hsl(240 10% 3.9%);
+  color: hsl(0 0% 98%);
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -355,14 +349,14 @@ body {
 }
 
 .copy-button:hover {
-  background: #333;
+  background: hsl(240 10% 3.9% / 0.9);
 }
 
 .code-block {
-  padding: 16px;
-  background: #1e1e1e;
-  color: #d4d4d4;
-  font-family: 'SF Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+  padding: 14px;
+  background: hsl(240 10% 3.9%);
+  color: hsl(0 0% 98%);
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
   font-size: 12px;
   line-height: 1.6;
   overflow-x: auto;
@@ -372,9 +366,9 @@ body {
 
 /* Status Messages */
 .message {
-  padding: 12px 16px;
+  padding: 12px 14px;
   margin: 16px 20px;
-  border-radius: 6px;
+  border-radius: 8px;
   border: 1px solid;
   font-size: 13px;
   font-weight: 500;
@@ -384,21 +378,21 @@ body {
 }
 
 .message.success {
-  background: #f0fdf4;
-  color: #166534;
-  border-color: #bbf7d0;
+  background: hsl(142.1 76.2% 36.3% / 0.1);
+  color: hsl(142.1 76.2% 36.3%);
+  border-color: hsl(142.1 76.2% 36.3% / 0.2);
 }
 
 .message.error {
-  background: #fef2f2;
-  color: #991b1b;
-  border-color: #fecaca;
+  background: hsl(0 84.2% 60.2% / 0.1);
+  color: hsl(0 84.2% 60.2%);
+  border-color: hsl(0 84.2% 60.2% / 0.2);
 }
 
 .message.info {
-  background: #f0f9ff;
-  color: #075985;
-  border-color: #bae6fd;
+  background: hsl(221.2 83.2% 53.3% / 0.1);
+  color: hsl(221.2 83.2% 53.3%);
+  border-color: hsl(221.2 83.2% 53.3% / 0.2);
 }
 
 .message-text {
@@ -415,62 +409,62 @@ body {
 
 .progress-bar {
   flex: 1;
-  height: 4px;
-  background: #e5e5e5;
-  border-radius: 2px;
+  height: 8px;
+  background: hsl(240 4.8% 95.9%);
+  border-radius: 4px;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  background: #000;
+  background: hsl(240 10% 3.9%);
   transition: width 0.3s ease;
-  border-radius: 2px;
+  border-radius: 4px;
 }
 
 .progress-text {
   font-size: 12px;
   font-weight: 600;
-  color: #666;
+  color: hsl(240 3.8% 46.1%);
   white-space: nowrap;
 }
 
 /* Status Badge */
 .status-badge {
   display: inline-block;
-  padding: 6px 12px;
+  padding: 4px 10px;
   margin-top: 12px;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
   border: 1px solid;
 }
 
 .status-badge.success {
-  background: #f0fdf4;
-  color: #166534;
-  border-color: #bbf7d0;
+  background: hsl(142.1 76.2% 36.3% / 0.1);
+  color: hsl(142.1 76.2% 36.3%);
+  border-color: hsl(142.1 76.2% 36.3% / 0.2);
 }
 
 /* Help Text */
 .help-text {
   font-size: 12px;
-  color: #999;
+  color: hsl(240 3.8% 46.1%);
   margin-top: 6px;
   line-height: 1.4;
 }
 
-/* Footer - Clean */
+/* Footer */
 .footer {
-  padding: 14px 24px;
-  background: #fafafa;
-  border-top: 1px solid #e5e5e5;
+  padding: 12px 24px;
+  background: hsl(0 0% 100%);
+  border-top: 1px solid hsl(240 5.9% 90%);
   text-align: center;
 }
 
 .footer-text {
   font-size: 12px;
-  color: #999;
+  color: hsl(240 3.8% 46.1%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -480,9 +474,9 @@ body {
 .badge {
   display: inline-block;
   padding: 2px 6px;
-  background: #000;
-  color: #fff;
-  border-radius: 3px;
+  background: hsl(240 10% 3.9%);
+  color: hsl(0 0% 98%);
+  border-radius: 4px;
   font-size: 10px;
   font-weight: 600;
 }
@@ -498,22 +492,22 @@ body {
   to { transform: rotate(360deg); }
 }
 
-/* Scrollbar - Minimal */
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: hsl(0 0% 100%);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d0d0d0;
+  background: hsl(240 5.9% 90%);
   border-radius: 5px;
-  border: 2px solid #fff;
+  border: 2px solid hsl(0 0% 100%);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #999;
+  background: hsl(240 4.8% 70%);
 }
