@@ -4,41 +4,45 @@ Tu as une fenêtre vide qui reste en "Loading"? Voici comment débugger:
 
 ## 🧪 Tests progressifs
 
-### Test 1: HTML pur (sans JS)
+### Test 1: HTML pur (sans JS bundlé) ✅ OK
 Vérifie si le problème vient du HTML/CSS ou du JavaScript.
 
 ```bash
 npm run test:html
 ```
 
-**Puis dans Figma:**
-- Recharge le plugin
-- Tu devrais voir 3 checkboxes vertes:
-  - ✅ HTML chargé
-  - ✅ CSS chargé
-  - ✅ JS chargé
-
-**Si tu vois "❌ JS non chargé"** → Le problème est le chargement JS de Figma.
+**Résultat:** ✅ Fonctionne - HTML/CSS/inline JS OK
 
 ---
 
-### Test 2: JS simple (sans React)
-Vérifie si React est le problème.
+### Test 2: JS bundled simple (sans React) ❌ BLOQUE
+Vérifie si le bundling esbuild fonctionne.
 
 ```bash
 npm run test:simple
 ```
 
-**Puis dans Figma:**
-- Recharge le plugin
-- Tu devrais voir: "✅ React Script Loaded!"
-
-**Si ça marche** → Le problème est React/ReactDOM.  
-**Si ça marche pas** → Le problème est le chargement général du JS.
+**Résultat:** ❌ Affiche "Loading" - Le bundle ne s'exécute pas
 
 ---
 
-### Test 3: Build complet
+### Test 3: JS NON-bundlé (copie directe) 🔥 TEST CRITIQUE
+Vérifie si c'est esbuild qui pose problème.
+
+```bash
+npm run test:minimal
+```
+
+**Puis dans Figma:**
+- Recharge le plugin
+- Tu devrais voir: "✅ MINIMAL JS WORKS!"
+
+**Si ça marche** → Le problème est esbuild  
+**Si ça marche pas** → Figma ne charge aucun fichier JS externe
+
+---
+
+### Test 4: Build complet
 Rebuild tout normalement.
 
 ```bash

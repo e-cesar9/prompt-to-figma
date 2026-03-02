@@ -5,11 +5,12 @@
   "main": "dist/code.js",
   "scripts": {
     "build": "npm run build:ui && npm run build:code && npm run copy:assets",
-    "build:ui": "esbuild src/ui.tsx --bundle --outfile=dist/ui.js --target=es2015 --format=iife",
+    "build:ui": "esbuild src/ui.tsx --bundle --outfile=dist/ui.js --target=es2020 --minify",
     "build:code": "esbuild src/code.ts --bundle --outfile=dist/code.js --platform=node --target=es2015 --external:@figma",
     "copy:assets": "mkdir -p dist && cp src/ui.html dist/ui.html && cp src/ui.css dist/ui.css",
     "test:html": "mkdir -p dist && cp src/ui-test.html dist/ui.html",
-    "test:simple": "esbuild src/ui-simple.tsx --bundle --outfile=dist/ui.js --target=es2015 --format=iife && npm run copy:assets",
+    "test:simple": "esbuild src/ui-simple.tsx --bundle --outfile=dist/ui.js --target=es2020 && npm run copy:assets",
+    "test:minimal": "mkdir -p dist && cp src/ui-minimal.js dist/ui.js && npm run copy:assets",
     "watch": "concurrently \"npm run build:ui -- --watch\" \"npm run build:code -- --watch\"",
     "dev": "npm run watch"
   },
