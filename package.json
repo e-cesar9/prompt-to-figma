@@ -6,7 +6,7 @@
   "scripts": {
     "build": "npm run build:ui && npm run build:code && npm run build:inline",
     "build:ui": "esbuild src/ui.tsx --bundle --outfile=dist/ui.js --target=es2020",
-    "build:code": "esbuild src/code.ts --bundle --outfile=dist/code.js --platform=node --target=es2015 --external:@figma",
+    "build:code": "esbuild src/code.ts --bundle --outfile=dist/code.js --target=es2020 --format=iife --external:@figma",
     "build:inline": "mkdir -p dist && cp src/ui.css dist/ui.css && node build-inline.js",
     "test:html": "mkdir -p dist && cp src/ui-test.html dist/ui.html",
     "test:simple": "esbuild src/ui-simple.tsx --bundle --outfile=dist/ui.js --target=es2020 && npm run copy:assets",
