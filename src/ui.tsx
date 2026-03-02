@@ -171,7 +171,7 @@ function App() {
                   className={`provider-btn ${aiProvider === 'anthropic' ? 'active' : ''}`}
                   onClick={() => setAiProvider('anthropic')}
                 >
-                  🧠 Claude
+                  🧠 Sonnet 4.5
                 </button>
                 <button
                   className={`provider-btn ${aiProvider === 'openai' ? 'active' : ''}`}
@@ -183,7 +183,7 @@ function App() {
                   className={`provider-btn ${aiProvider === 'deepseek' ? 'active' : ''}`}
                   onClick={() => setAiProvider('deepseek')}
                 >
-                  🚀 DeepSeek-R
+                  🚀 DeepSeek
                 </button>
               </div>
             </div>

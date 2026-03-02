@@ -53,7 +53,7 @@ async function callAI(prompt: string, apiKey: string, provider: 'anthropic' | 'o
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5-20241022',
         max_tokens: 8192,
         messages: [{ role: 'user', content: prompt }],
       }),
@@ -88,7 +88,7 @@ async function callAI(prompt: string, apiKey: string, provider: 'anthropic' | 'o
     const data = await response.json();
     return data.choices[0].message.content;
   } else {
-    // DeepSeek - using deepseek-reasoner (v3.2 with thinking mode, 128K context)
+    // DeepSeek - using deepseek-chat (v3.2, 128K context)
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -96,7 +96,7 @@ async function callAI(prompt: string, apiKey: string, provider: 'anthropic' | 'o
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'deepseek-reasoner',
+        model: 'deepseek-chat',
         max_tokens: 8192,
         messages: [{ role: 'user', content: prompt }],
       }),
