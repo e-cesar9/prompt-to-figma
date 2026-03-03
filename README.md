@@ -1,13 +1,23 @@
 # 🤖 Prompt to Figma
 
-[![GitHub release](https://img.shields.io/github/v/release/e-cesar9/prompt-to-figma?include_prereleases)](https://github.com/e-cesar9/prompt-to-figma/releases)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Made with TypeScript](https://img.shields.io/badge/Made%20with-TypeScript-blue)](https://www.typescriptlang.org/)
-[![Figma Plugin](https://img.shields.io/badge/Figma-Plugin-purple)](https://www.figma.com/community)
+<p align="center">
+  <img src=".github/assets/hero.png" alt="Prompt to Figma Plugin Screenshot" width="100%" />
+</p>
 
-**AI-powered Design System Generator and Code Exporter for Figma**
+<p align="center">
+  <a href="https://github.com/e-cesar9/prompt-to-figma/releases"><img src="https://img.shields.io/github/v/release/e-cesar9/prompt-to-figma?include_prereleases" alt="GitHub release" /></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
+  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/Made%20with-TypeScript-blue" alt="Made with TypeScript" /></a>
+  <a href="https://www.figma.com/community"><img src="https://img.shields.io/badge/Figma-Plugin-purple" alt="Figma Plugin" /></a>
+</p>
 
-Transform text descriptions into complete, production-ready design systems and export Figma designs to clean code—powered by Claude, GPT, or DeepSeek.
+<p align="center">
+  <strong>AI-powered Design System Generator and Code Exporter for Figma</strong>
+</p>
+
+<p align="center">
+  Transform text descriptions into complete, production-ready design systems and export Figma designs to clean code—powered by Claude, GPT, or DeepSeek.
+</p>
 
 ---
 
