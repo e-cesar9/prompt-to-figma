@@ -236,7 +236,7 @@ function validateApiKey(key: string, provider: 'anthropic' | 'openai' | 'deepsee
 
 function sanitizeErrorMessage(error: any, provider: string): string {
   // Never expose raw API errors or keys to the user
-  const status = error?.status || 'unknown';
+  const status = (error && error.status) || 'unknown';
   
   if (status === 401 || status === 403) {
     return `Authentication failed. Please check your ${provider} API key in Settings.`;
@@ -246,7 +246,7 @@ function sanitizeErrorMessage(error: any, provider: string): string {
     return `Invalid request. The prompt may be too complex or contain unsupported content.`;
   } else if (status === 500 || status === 502 || status === 503) {
     return `${provider} service temporarily unavailable. Please try again later.`;
-  } else if (error?.message?.includes('fetch')) {
+  } else if (error && error.message && error.message.includes('fetch')) {
     return `Network error. Check your internet connection and try again.`;
   }
   
