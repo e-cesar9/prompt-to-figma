@@ -19,6 +19,12 @@ async function loadFontsOnce() {
   fontsLoaded = true;
 }
 
+// Pre-load fonts in background on plugin startup (don't block UI)
+loadFontsOnce().catch(err => {
+  console.warn('Failed to pre-load fonts:', err);
+  // Not critical, fonts will be loaded on-demand if this fails
+});
+
 interface DesignTokens {
   colors: {
     primary: Record<string, string>;
