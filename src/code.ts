@@ -199,8 +199,68 @@ function validateAndFixTokens(tokens: DesignTokens): DesignTokens {
   return fixed;
 }
 
+// ========================================
+// API KEY VALIDATION & SECURITY
+// ========================================
+
+function validateApiKey(key: string, provider: 'anthropic' | 'openai' | 'deepseek'): { valid: boolean; error?: string } {
+  if (!key || key.trim().length === 0) {
+    return { valid: false, error: 'API key is empty' };
+  }
+
+  const trimmedKey = key.trim();
+
+  if (provider === 'anthropic') {
+    if (!trimmedKey.startsWith('sk-ant-')) {
+      return { valid: false, error: 'Invalid Anthropic API key format (should start with sk-ant-)' };
+    }
+    if (trimmedKey.length < 20) {
+      return { valid: false, error: 'Anthropic API key too short' };
+    }
+  } else if (provider === 'openai') {
+    if (!trimmedKey.startsWith('sk-')) {
+      return { valid: false, error: 'Invalid OpenAI API key format (should start with sk-)' };
+    }
+    if (trimmedKey.length < 20) {
+      return { valid: false, error: 'OpenAI API key too short' };
+    }
+  } else if (provider === 'deepseek') {
+    // DeepSeek keys don't have a standard prefix, just check minimum length
+    if (trimmedKey.length < 20) {
+      return { valid: false, error: 'DeepSeek API key too short' };
+    }
+  }
+
+  return { valid: true };
+}
+
+function sanitizeErrorMessage(error: any, provider: string): string {
+  // Never expose raw API errors or keys to the user
+  const status = error?.status || 'unknown';
+  
+  if (status === 401 || status === 403) {
+    return `Authentication failed. Please check your ${provider} API key in Settings.`;
+  } else if (status === 429) {
+    return `Rate limit exceeded. Please try again in a few moments.`;
+  } else if (status === 400) {
+    return `Invalid request. The prompt may be too complex or contain unsupported content.`;
+  } else if (status === 500 || status === 502 || status === 503) {
+    return `${provider} service temporarily unavailable. Please try again later.`;
+  } else if (error?.message?.includes('fetch')) {
+    return `Network error. Check your internet connection and try again.`;
+  }
+  
+  // Generic fallback (don't leak details)
+  return `Generation failed. Please check your API key and try again.`;
+}
+
 // AI API call handler - supports Anthropic, OpenAI, and DeepSeek
 async function callAI(prompt: string, apiKey: string, provider: 'anthropic' | 'openai' | 'deepseek'): Promise<string> {
+  // Validate API key format before making the call
+  const validation = validateApiKey(apiKey, provider);
+  if (!validation.valid) {
+    throw new Error(validation.error || 'Invalid API key');
+  }
   if (provider === 'anthropic') {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -217,8 +277,7 @@ async function callAI(prompt: string, apiKey: string, provider: 'anthropic' | 'o
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Anthropic API error: ${response.status} - ${error}`);
+      throw new Error(sanitizeErrorMessage({ status: response.status }, 'Anthropic'));
     }
 
     const data = await response.json();
@@ -238,8 +297,7 @@ async function callAI(prompt: string, apiKey: string, provider: 'anthropic' | 'o
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`OpenAI API error: ${response.status} - ${error}`);
+      throw new Error(sanitizeErrorMessage({ status: response.status }, 'OpenAI'));
     }
 
     const data = await response.json();
@@ -260,8 +318,7 @@ async function callAI(prompt: string, apiKey: string, provider: 'anthropic' | 'o
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`DeepSeek API error: ${response.status} - ${error}`);
+      throw new Error(sanitizeErrorMessage({ status: response.status }, 'DeepSeek'));
     }
 
     const data = await response.json();

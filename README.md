@@ -167,6 +167,53 @@ See **[MODELS.md](MODELS.md)** for detailed comparison.
 
 ---
 
+## 🔐 Security
+
+### How API Keys are Stored
+
+Your API keys are stored **locally on your machine** using Figma's `clientStorage` API. They:
+- ✅ Never leave your computer (except to make API calls to your chosen provider)
+- ✅ Are NOT uploaded to Figma servers
+- ✅ Are NOT shared when you share Figma files
+- ✅ Persist between sessions (no need to re-enter)
+
+### Key Validation
+
+The plugin automatically validates API key formats before making requests:
+- **Anthropic:** Must start with `sk-ant-`
+- **OpenAI:** Must start with `sk-`
+- **DeepSeek:** Minimum length requirements
+
+Invalid keys are rejected **before** API calls to prevent unnecessary errors.
+
+### Error Handling
+
+Error messages are **sanitized** to prevent leaking sensitive information:
+- ❌ Raw API errors are never shown to users
+- ✅ User-friendly messages guide troubleshooting
+- ✅ Status codes are mapped to actionable advice
+
+### Best Practices
+
+⚠️ **Important Security Guidelines:**
+
+1. **Only use on trusted devices** - Keys are stored in plaintext locally
+2. **Don't share Settings screenshots** - Could expose your API key
+3. **Use separate keys for testing** - Don't use production keys
+4. **Monitor usage in provider dashboards** - Watch for unexpected activity
+5. **Rotate keys periodically** - Especially if shared computer
+
+### Network Security
+
+The plugin is restricted to communicate **only** with approved domains:
+- `https://api.anthropic.com`
+- `https://api.openai.com`
+- `https://api.deepseek.com`
+
+No other network requests are possible (enforced by Figma's plugin security model).
+
+---
+
 ## 🐛 Troubleshooting
 
 ### Plugin won't load

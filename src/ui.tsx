@@ -311,6 +311,30 @@ function App() {
               Connect your AI provider to start generating designs.
             </p>
 
+            <div className="security-warning" style={{
+              backgroundColor: '#FFF3CD',
+              border: '1px solid #FFE69C',
+              borderRadius: '8px',
+              padding: '12px 16px',
+              marginBottom: '20px',
+              fontSize: '13px',
+              lineHeight: '1.5'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                <span style={{ fontSize: '16px', flexShrink: 0 }}>⚠️</span>
+                <div>
+                  <strong style={{ display: 'block', marginBottom: '4px', color: '#664D03' }}>
+                    Security Notice
+                  </strong>
+                  <span style={{ color: '#664D03' }}>
+                    Your API key is stored locally on your device. Only use this plugin on trusted computers. 
+                    Never share screenshots of this Settings tab. 
+                    Keys are sent only to the selected AI provider (Anthropic, OpenAI, or DeepSeek).
+                  </span>
+                </div>
+              </div>
+            </div>
+
             <div className="form-group">
               <label className="label">AI Provider</label>
               <div className="provider-selector">
