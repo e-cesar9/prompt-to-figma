@@ -2,7 +2,7 @@
 
 **AI-powered Design System Generator and Code Exporter for Figma**
 
-Convert text descriptions into complete Figma design systems and export designs to clean code—powered by Claude AI.
+Convert text descriptions into complete Figma design systems and export designs to clean code—powered by your choice of Claude, GPT, or DeepSeek.
 
 ---
 
@@ -27,6 +27,12 @@ Convert text descriptions into complete Figma design systems and export designs 
 - Preserves styles and structure
 - Auto-layout support
 
+### 🤖 Multi-Provider Support
+- **🧠 Anthropic Claude** - Creative, nuanced design systems
+- **🤖 OpenAI GPT** - Fast, structured generation
+- **🚀 DeepSeek R1** - Cost-effective with reasoning capabilities
+- Switch providers on the fly in Settings
+
 ---
 
 ## 🚀 Quick Start
@@ -34,12 +40,15 @@ Convert text descriptions into complete Figma design systems and export designs 
 ### Prerequisites
 - Node.js 20+
 - Figma desktop app
-- Anthropic API key → [Get one here](https://console.anthropic.com)
+- API key from one of:
+  - [Anthropic](https://console.anthropic.com) (Claude)
+  - [OpenAI](https://platform.openai.com) (GPT)
+  - [DeepSeek](https://platform.deepseek.com) (DeepSeek R1)
 
 ### Installation
 
 ```bash
-# Clone the repo
+# Navigate to repo
 cd /home/james2/mcptofigmatocode
 
 # Install dependencies
@@ -60,8 +69,9 @@ npm run build
 
 1. Open the plugin in Figma
 2. Go to **⚙️ Settings** tab
-3. Paste your Anthropic API key
-4. Click **💾 Save Settings**
+3. Select your AI provider (Anthropic / OpenAI / DeepSeek)
+4. Paste your API key
+5. Click **💾 Save Settings**
 
 Keys are stored locally in Figma (secure, persistent).
 
@@ -78,7 +88,7 @@ Keys are stored locally in Figma (secure, persistent).
    - "Gaming app, dark mode, neon accents, competitive"
    - "Healthcare, calm, reassuring, elderly-friendly"
 4. Click **✨ Generate Design System**
-5. Wait ~10 seconds
+5. Wait ~10-20 seconds
 6. New page created with complete design system!
 
 **Output includes:**
@@ -133,25 +143,27 @@ mcptofigmatocode/
 │   └── ui.html
 ├── manifest.json        # Figma plugin manifest
 ├── package.json
-└── README.md
+├── README.md
+├── HOW_IT_WORKS.md      # Architecture details
+└── MODELS.md            # Provider comparison
 ```
 
 ---
 
-## 🔧 Configuration
+## 🤖 AI Providers
 
-### API Provider
+See **[MODELS.md](MODELS.md)** for detailed comparison.
 
-The plugin uses **Anthropic Claude** (Sonnet 4).
+| Provider | Model | Best For | Speed | Cost |
+|----------|-------|----------|-------|------|
+| **Anthropic** | Claude Sonnet 4.5 | Creative design systems | ⭐⭐⭐⭐ | $$$ |
+| **OpenAI** | GPT-5.2 | Fast, structured output | ⭐⭐⭐⭐⭐ | $$$ |
+| **DeepSeek** | DeepSeek R1 (Reasoner) | Budget + reasoning | ⭐⭐⭐⭐ | $ |
 
-To change model, edit `src/code.ts`:
-```typescript
-model: 'claude-sonnet-4-20250514'  // Or claude-opus-4 for higher quality
-```
-
-### Custom Prompts
-
-To customize design system generation, edit the prompt in `generateDesignSystem()` function in `src/code.ts`.
+**Quick recommendations:**
+- **Start with DeepSeek** - 50x cheaper, great for testing
+- **Use Claude** - Best for creative, nuanced design systems
+- **Use GPT-5.2** - Fast and reliable for production
 
 ---
 
@@ -163,12 +175,12 @@ To customize design system generation, edit the prompt in `generateDesignSystem(
 
 ### API errors
 - Verify API key is valid in Settings
-- Check Anthropic rate limits (free tier = 50 req/day)
+- Check provider rate limits
 - Ensure network access is allowed
 
 ### Generation fails
 - Simplify your brief
-- Try shorter descriptions
+- Try a different provider
 - Check Figma console for detailed errors
 
 ### Code export broken
@@ -183,6 +195,7 @@ To customize design system generation, edit the prompt in `generateDesignSystem(
 ### Current: MVP ✅
 - [x] Design system generation
 - [x] Code export (React/Vue/HTML)
+- [x] Multi-provider support (Claude, GPT, DeepSeek)
 - [x] API key management
 
 ### Next Steps
@@ -209,6 +222,8 @@ MIT License - Free to use, modify, and distribute.
 ## 🙏 Built With
 
 - [Anthropic Claude](https://anthropic.com) - AI generation
+- [OpenAI GPT](https://openai.com) - AI generation
+- [DeepSeek](https://deepseek.com) - AI generation
 - [Figma Plugin API](https://figma.com/plugin-docs) - Plugin framework
 - [React](https://react.dev) - UI
 - [esbuild](https://esbuild.github.io) - Bundler

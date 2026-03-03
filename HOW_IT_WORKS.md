@@ -2,7 +2,7 @@
 
 ## 📖 Overview
 
-The plugin sends structured prompts to Claude AI, receives JSON responses, then **creates native Figma elements** via the Figma Plugin API.
+The plugin sends structured prompts to your chosen AI provider (Claude, GPT, or DeepSeek), receives JSON responses, then **creates native Figma elements** via the Figma Plugin API.
 
 ---
 
@@ -15,16 +15,23 @@ The plugin sends structured prompts to Claude AI, receives JSON responses, then 
 1. **User enters a brief** in the "🎨 Design System" tab
    - Example: *"Modern fintech app, trustworthy, blue and green"*
 
-2. **Plugin sends prompt to Claude AI** (via Anthropic API)
-   - Structured prompt requesting: colors, typography, spacing, shadows, components
+2. **User selects AI provider** in Settings
+   - **Anthropic Claude** - Most creative, best for design
+   - **OpenAI GPT** - Fast and reliable
+   - **DeepSeek** - Budget-friendly with reasoning
 
-3. **AI responds with structured JSON:**
+3. **Plugin sends structured prompt to AI API**
+   - Requests: colors, typography, spacing, shadows, components
+   - Uses provider-specific API format
+
+4. **AI responds with structured JSON:**
    ```json
    {
      "colors": {
        "primary": { "50": "#...", "100": "#...", ... },
        "secondary": {...},
-       "neutral": {...}
+       "neutral": {...},
+       "semantic": {...}
      },
      "typography": {
        "fontFamily": "Inter",
@@ -33,21 +40,23 @@ The plugin sends structured prompts to Claude AI, receives JSON responses, then 
        ]
      },
      "spacing": [0, 4, 8, 16, 24, 32, ...],
+     "borderRadius": [0, 4, 8, 12, 16, ...],
      "shadows": [...],
      "components": [...]
    }
    ```
 
-4. **Plugin creates Figma elements:**
+5. **Plugin creates Figma elements:**
    - New page: "🎨 Design System"
-   - Sections: Colors, Typography, Spacing, Shadows, Components
-   - Color swatches (all shades)
-   - Typography samples
-   - Spacing grid
-   - 30+ component examples
-   - Light & Dark mode variants
+   - Sections organized by type
+   - **Colors**: Swatches for all shades (50-900)
+   - **Typography**: Text samples for each style
+   - **Spacing**: Visual grid
+   - **Shadows**: Component examples
+   - **Components**: 30+ UI elements (Button, Input, Card, Badge, Avatar, etc.)
+   - **Light & Dark modes**: Complete theme variants
 
-**Result:** Complete, production-ready design system in ~10 seconds! ✨
+**Result:** Complete, production-ready design system in ~10-20 seconds! ✨
 
 ---
 
@@ -59,14 +68,25 @@ The plugin sends structured prompts to Claude AI, receives JSON responses, then 
 
 2. **Chooses export format** (React / Vue / HTML)
 
-3. **Plugin traverses Figma tree:**
-   - Reads layer structure
-   - Extracts styles (colors, sizes, positions, fonts)
-   - Generates corresponding code
+3. **Plugin traverses Figma node tree:**
+   - Reads layer hierarchy
+   - Extracts styles (colors, sizes, positions, fonts, spacing)
+   - Detects auto-layout properties
+   - Identifies component types
 
-4. **User copies generated code**
+4. **AI enhances with semantic understanding** (optional)
+   - Identifies button roles, input types, etc.
+   - Adds accessibility attributes
+   - Suggests component names
 
-**Result:** Clean, styled code ready to use! 💻
+5. **Generates clean code:**
+   - React: Functional components with props
+   - Vue: Single-file components
+   - HTML: Semantic markup + CSS
+
+6. **User copies code to clipboard**
+
+**Result:** Production-ready code with preserved styles! 💻
 
 ---
 
@@ -77,106 +97,237 @@ The plugin sends structured prompts to Claude AI, receives JSON responses, then 
 │             Figma Desktop App               │
 ├─────────────────────────────────────────────┤
 │  ┌────────────────────────────────────────┐ │
-│  │  UI (React - ui.tsx)                   │ │
-│  │  - Input forms                         │ │
-│  │  - Generate buttons                    │ │
-│  │  - Settings panel                      │ │
+│  │  UI Layer (React - ui.tsx)             │ │
+│  │  ┌──────────────────────────────────┐  │ │
+│  │  │ • Input forms                    │  │ │
+│  │  │ • Provider selector (3 choices)  │  │ │
+│  │  │ • Generate buttons               │  │ │
+│  │  │ • Settings panel                 │  │ │
+│  │  └──────────────────────────────────┘  │ │
 │  └────────────────────────────────────────┘ │
-│              ↕️ postMessage                 │
+│              ↕️ postMessage API             │
 │  ┌────────────────────────────────────────┐ │
-│  │  Backend (code.ts)                     │ │
-│  │  - Receives UI messages                │ │
-│  │  - Calls Claude API                    │ │
-│  │  - Creates Figma elements              │ │
-│  │  - Generates export code               │ │
+│  │  Plugin Backend (code.ts)              │ │
+│  │  ┌──────────────────────────────────┐  │ │
+│  │  │ • Message handler                │  │ │
+│  │  │ • AI API router (3 providers)    │  │ │
+│  │  │ • Figma element creator          │  │ │
+│  │  │ • Code generator                 │  │ │
+│  │  └──────────────────────────────────┘  │ │
 │  └────────────────────────────────────────┘ │
 │              ↕️ Figma Plugin API            │
 │  ┌────────────────────────────────────────┐ │
 │  │  Figma Document                        │ │
-│  │  - Pages, frames, layers, styles       │ │
+│  │  • Pages, frames, layers, styles       │ │
 │  └────────────────────────────────────────┘ │
 └─────────────────────────────────────────────┘
               ↕️ HTTPS
 ┌─────────────────────────────────────────────┐
-│  Anthropic Claude API                       │
-│  - Receives prompts                         │
-│  - Returns structured JSON                  │
+│          AI Provider APIs                   │
+│  ┌───────────────────────────────────────┐  │
+│  │ 🧠 Anthropic Claude API               │  │
+│  │    api.anthropic.com                  │  │
+│  ├───────────────────────────────────────┤  │
+│  │ 🤖 OpenAI GPT API                     │  │
+│  │    api.openai.com                     │  │
+│  ├───────────────────────────────────────┤  │
+│  │ 🚀 DeepSeek API                       │  │
+│  │    api.deepseek.com                   │  │
+│  └───────────────────────────────────────┘  │
 └─────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🔑 API Keys
+## 🔑 Provider Routing
 
-**Why you provide your own key:**
-- Direct API calls from plugin (no backend)
-- Simple architecture
-- Your quota, your control
+The plugin intelligently routes requests based on your selected provider:
+
+```typescript
+// Simplified routing logic
+async function callAI(prompt, apiKey, provider) {
+  if (provider === 'anthropic') {
+    // Call Claude Sonnet 4.5
+    return fetch('https://api.anthropic.com/v1/messages', {
+      model: 'claude-sonnet-4-5-20241022',
+      ...
+    })
+  } 
+  else if (provider === 'openai') {
+    // Call GPT-5.2
+    return fetch('https://api.openai.com/v1/chat/completions', {
+      model: 'gpt-5.2',
+      ...
+    })
+  }
+  else if (provider === 'deepseek') {
+    // Call DeepSeek R1 (reasoning model)
+    return fetch('https://api.deepseek.com/v1/chat/completions', {
+      model: 'deepseek-reasoner',
+      ...
+    })
+  }
+}
+```
+
+---
+
+## 🔐 API Keys & Security
+
+**Why you provide your own keys:**
+- Direct API calls from plugin (no middleman)
+- Simple architecture, no backend needed
+- You control quota and billing
+- No data passes through third-party servers
 
 **Storage:**
-- Saved in `figma.clientStorage` (local, persistent)
-- Never leaves your machine (except to Anthropic)
+- Saved in `figma.clientStorage` (local to your machine)
+- Persists between sessions
+- Never sent anywhere except to the chosen AI provider
+- **Each provider's key is stored separately**
+
+**Switching providers:**
+- Keys are cached per provider
+- Switch anytime without re-entering keys
+- Plugin remembers last used provider
 
 ---
 
 ## 🎯 Example Use Cases
 
-### Use Case 1: Full Design System
+### Use Case 1: Full Design System (Creative)
 
-1. Open plugin → **🎨 Design System** tab
-2. Enter: *"SaaS B2B platform, professional, trustworthy, blues and grays"*
-3. Click **✨ Generate Design System**
-4. Wait ~10 seconds
-5. **Boom!** New page with:
-   - Complete color palette (all shades)
-   - Typography scale (H1-H6, body, captions)
-   - Spacing grid
-   - 30+ components (buttons, inputs, cards, badges, avatars...)
-   - Light + Dark mode
+**Goal:** Beautiful, polished design system for client presentation
 
-### Use Case 2: Design to Code
+1. Open plugin → **⚙️ Settings**
+2. Select **🧠 Anthropic Claude** (best for creative work)
+3. Enter API key, Save
+4. Go to **🎨 Design System** tab
+5. Enter: *"SaaS B2B platform, professional, trustworthy, navy blues and teals"*
+6. Click **✨ Generate Design System**
+7. Wait ~10 seconds
+8. **Result:** Gorgeous design system with nuanced colors and typography
 
-1. Design something in Figma
-2. Select the frame
-3. Open plugin → **💻 Export Code**
-4. Choose React/Vue/HTML
-5. Copy code! 🚀
+**Why Claude:** Most "taste", best color palettes, highest design quality
 
 ---
 
-## ⚡ Why It's Powerful
+### Use Case 2: Rapid Prototyping (Budget)
 
-- **Speed:** 10 seconds vs 2 hours for a design system
-- **Consistency:** Everything is structured and connected
-- **Iteration:** Change the brief, regenerate instantly
-- **Learning:** See how professional design systems are built
-- **Prototyping:** Test ideas rapidly
+**Goal:** Test 10 different design directions quickly
+
+1. Select **🚀 DeepSeek** in Settings
+2. Generate system: *"Modern e-commerce, vibrant, Gen Z"*
+3. Review → Iterate
+4. Generate system: *"E-commerce, minimal, luxury"*
+5. Repeat 8 more times
+6. **Total cost:** ~$0.10 (vs $3-5 with Claude)
+
+**Why DeepSeek:** 50x cheaper, fast enough, good quality for iteration
 
 ---
 
-## 💡 Tips
+### Use Case 3: Production Code Export
 
-- Be **specific** in briefs (audience, industry, mood, colors)
-- Start with **Design System first**, then build screens (consistency)
-- **Modify after generation** - everything is native Figma (editable)
-- Use **clear, concise** descriptions for best results
+**Goal:** Export polished React components for production
+
+1. Design components in Figma
+2. Select **🤖 OpenAI GPT-5.2** in Settings
+3. Select frame → **💻 Export Code** → React
+4. **Result:** Clean, modern React components
+
+**Why GPT:** Best code generation, latest model optimized for coding
+
+---
+
+## ⚡ Performance Tips
+
+### For Faster Generation
+- Use **OpenAI GPT-5.2** (fastest)
+- Keep briefs concise
+- Generate during off-peak hours
+
+### For Best Quality
+- Use **Anthropic Claude Sonnet 4.5**
+- Be specific in briefs (audience, mood, industry)
+- Include color preferences
+
+### For Cost Optimization
+- Use **DeepSeek R1** for testing and iteration
+- Switch to Claude for final polish
+- Reuse generated systems as templates
+
+---
+
+## 💡 Pro Tips
+
+### Design System Generation
+1. **Be specific:** "Healthcare app, calming, elderly users, high contrast" beats "app design"
+2. **Mention industry:** Helps AI pick appropriate patterns
+3. **Specify colors:** "Blues and greens" or "Warm, earthy tones"
+4. **Include mood:** "Professional", "Playful", "Trustworthy", etc.
+
+### Code Export
+1. **Name layers clearly:** AI uses layer names for semantic understanding
+2. **Use auto-layout:** Generates better flexbox/grid code
+3. **Group logically:** Components export cleaner when well-structured
+4. **Select specific frames:** Don't export entire pages, focus on components
 
 ---
 
 ## 🐛 Troubleshooting
 
+### API Errors
+
 **"Please add your API key"**
-→ Settings tab → Enter key → Save
+→ Go to Settings, select provider, enter key, Save
 
-**"Failed to fetch"**
-→ Verify API key is valid in Anthropic Console
+**"Failed to fetch" or 401 error**
+→ Verify API key is valid in provider console
 
-**Generation takes >30s**
-→ Normal for full design systems (many elements)
+**"Rate limit exceeded"**
+→ Check provider dashboard for quota limits
+→ Free tiers have daily limits (switch provider temporarily)
 
-**Results not perfect**
-→ Refine your brief, be more specific
+**Different providers, different results?**
+→ Yes! Each AI has unique "taste" and patterns
+→ Try multiple providers, pick what you like
+
+### Generation Issues
+
+**Takes too long (>30s)**
+→ Normal for complex design systems
+→ Try simpler brief or different provider
+→ Check network connection
+
+**Output not as expected**
+→ Refine brief with more specifics
+→ Try different provider (Claude for design, GPT for code)
+→ Iterate with slight variations
+
+**Figma crashes during generation**
+→ Creating many elements is intensive
+→ Close other plugins
+→ Reduce brief scope (fewer components)
 
 ---
 
-**Ready to generate design systems in seconds?** 🚀
+## 🚀 Next Steps
+
+**First time using the plugin?**
+
+1. **Start with DeepSeek** - Cheap to experiment
+2. **Try all 3 providers** with same brief - Compare results
+3. **Find your favorite** - Different vibes for different needs
+4. **Learn the patterns** - See how pros structure design systems
+5. **Iterate and refine** - Regenerate until perfect
+
+**Ready to generate?** Load the plugin and start creating! ✨
+
+---
+
+## 📚 Further Reading
+
+- **[MODELS.md](MODELS.md)** - Detailed provider comparison
+- **[README.md](README.md)** - Setup and installation guide
+- [Figma Plugin API Docs](https://www.figma.com/plugin-docs/) - Deep dive into plugin development
