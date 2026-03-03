@@ -1,8 +1,13 @@
-# 🤖 MCP to Figma to Code
+# 🤖 Prompt to Figma
+
+[![GitHub release](https://img.shields.io/github/v/release/e-cesar9/prompt-to-figma?include_prereleases)](https://github.com/e-cesar9/prompt-to-figma/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Made with TypeScript](https://img.shields.io/badge/Made%20with-TypeScript-blue)](https://www.typescriptlang.org/)
+[![Figma Plugin](https://img.shields.io/badge/Figma-Plugin-purple)](https://www.figma.com/community)
 
 **AI-powered Design System Generator and Code Exporter for Figma**
 
-Convert text descriptions into complete Figma design systems and export designs to clean code—powered by your choice of Claude, GPT, or DeepSeek.
+Transform text descriptions into complete, production-ready design systems and export Figma designs to clean code—powered by Claude, GPT, or DeepSeek.
 
 ---
 
@@ -48,8 +53,9 @@ Convert text descriptions into complete Figma design systems and export designs 
 ### Installation
 
 ```bash
-# Navigate to repo
-cd /home/james2/mcptofigmatocode
+# Clone the repo
+git clone https://github.com/e-cesar9/prompt-to-figma.git
+cd prompt-to-figma
 
 # Install dependencies
 npm install
@@ -131,7 +137,7 @@ npm run build:code
 ### Project Structure
 
 ```
-mcptofigmatocode/
+prompt-to-figma/
 ├── src/
 │   ├── code.ts          # Plugin backend (Figma sandbox)
 │   ├── ui.tsx           # Plugin UI (React)
@@ -280,7 +286,8 @@ MIT License - Free to use, modify, and distribute.
 ## 🚀 Get Started
 
 ```bash
-cd /home/james2/mcptofigmatocode
+git clone https://github.com/e-cesar9/prompt-to-figma.git
+cd prompt-to-figma
 npm install
 npm run build
 # Load in Figma → Create design systems in seconds! ✨

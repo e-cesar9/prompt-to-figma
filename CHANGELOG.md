@@ -72,6 +72,6 @@ First stable release of MCP to Figma to Code plugin.
 
 ## Links
 
-- **Repository**: https://github.com/e-cesar9/mcptofigmatocode
-- **Issues**: https://github.com/e-cesar9/mcptofigmatocode/issues
-- **Releases**: https://github.com/e-cesar9/mcptofigmatocode/releases
+- **Repository**: https://github.com/e-cesar9/prompt-to-figma
+- **Issues**: https://github.com/e-cesar9/prompt-to-figma/issues
+- **Releases**: https://github.com/e-cesar9/prompt-to-figma/releases
