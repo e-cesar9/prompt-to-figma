@@ -1,118 +1,98 @@
-# 🤖 AI Models Supported
+# 🤖 AI Models
 
-## Current Models (Updated Mar 2026)
+## Current Setup
 
-### 🧠 Anthropic Claude Sonnet 4.5
-- **Model:** `claude-sonnet-4-5-20241022`
+### 🧠 Anthropic Claude Sonnet 4
+
+- **Model:** `claude-sonnet-4-20250514`
 - **Context:** 200K tokens
 - **Max output:** 8192 tokens
-- **Best for:** Creative design, complex reasoning, design systems
+- **Best for:** Design systems, creative generation, complex reasoning
 - **API:** https://api.anthropic.com
 
-### 🤖 OpenAI GPT-5.2
-- **Model:** `gpt-5.2`
-- **Context:** Large (128K+)
-- **Max output:** 4096 tokens (safe limit for API)
-- **Best for:** Coding, agentic tasks, structured output
-- **API:** https://api.openai.com
-- **Note:** Latest OpenAI flagship model (supersedes GPT-4o, o3, etc.)
-
-### 🚀 DeepSeek Chat
-- **Model:** `deepseek-chat` (DeepSeek-V3.2)
-- **Context:** 128K tokens
-- **Max output:** Default 4K, Maximum 8K
-- **Best for:** Cost-effective generation, fast responses
-- **API:** https://api.deepseek.com
-- **Features:** 
-  - JSON output support
-  - Tool calls support
-  - FIM completion (beta)
-  - Cache support ($0.028/1M cached, $0.28/1M uncached)
-- **Note:** Non-thinking mode (faster & cheaper than deepseek-reasoner)
-
 ---
 
-## Model Comparison
+## Why Claude?
 
-| Feature | Sonnet 4.5 | GPT-5.2 | DeepSeek |
-|---------|-----------|---------|----------|
-| **Context Window** | 200K | 128K+ | 128K |
-| **Max Output** | 8192 | 4096 | 8192 |
-| **Thinking Mode** | ❌ | ❌ | ❌ (chat mode) |
-| **JSON Mode** | ✅ | ✅ | ✅ |
-| **Tool Calls** | ✅ | ✅ | ✅ |
-| **Speed** | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| **Quality** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
-| **Cost** | $$$ | $$$ | $ |
-
----
-
-## Recommendations
-
-### For Design Systems
-**Best:** Claude Sonnet 4.5 or GPT-5.2
-- Most creative and nuanced color palettes
-- Better understanding of design principles
+**Strengths:**
+- Excellent understanding of design principles
+- Creative and nuanced color palettes
 - High-quality component generation
+- Great at following structured prompts
+- Reliable JSON output
 
-### For Screen Generation
-**Best:** GPT-5.2 or DeepSeek
-- Faster generation
-- Good structural understanding
-- DeepSeek is very cost-effective
-
-### For Code Export
-**Best:** GPT-5.2
-- Latest model optimized for coding
-- Better code structure and conventions
-- Agentic capabilities
-
-### For Budget-Conscious
-**Best:** DeepSeek Chat
-- 10x cheaper than GPT-5.2/Claude
-- Fast responses (non-thinking mode)
-- Cache support reduces costs further (2.8¢ vs 28¢ per 1M cached tokens)
-- Still very capable (V3.2 is powerful)
+**Perfect for:**
+- Design system generation
+- Screen layouts
+- Creative design work
 
 ---
 
-## API Keys
+## Configuration
 
-Get your keys here:
-- **Anthropic:** https://console.anthropic.com/settings/keys
-- **OpenAI:** https://platform.openai.com/api-keys
-- **DeepSeek:** https://platform.deepseek.com
+The model is set in `src/code.ts`:
 
----
+```typescript
+model: 'claude-sonnet-4-20250514'
+```
 
-## Pricing (Approximate, Mar 2026)
+### To Change Model
 
-| Model | Input (1M tokens) | Output (1M tokens) |
-|-------|-------------------|-------------------|
-| **Claude Sonnet 4.5** | ~$3 | ~$15 |
-| **GPT-5.2** | ~$5 | ~$15 |
-| **DeepSeek Chat** | $0.28 ($0.028 cached) | $0.42 |
+Edit `src/code.ts` and update the model string:
 
-**Example cost for 1 Design System generation:**
-- Claude Sonnet 4.5: ~$0.50
-- GPT-5.2: ~$0.60
-- DeepSeek: ~$0.05 (or $0.01 with cache)
+```typescript
+// For higher quality (more expensive)
+model: 'claude-opus-4-20250514'
 
----
+// For faster/cheaper
+model: 'claude-haiku-4-20250514'
+```
 
-## Model Selection Tips
-
-1. **Start with DeepSeek** to test and iterate (50x cheaper!)
-2. **Use Claude Sonnet 4.5 or GPT-5.2** for final, production designs
-3. **Switch models** if one gives better results for your use case
-4. All models work well - choice depends on budget and preference
-
-**Pro tip:** DeepSeek's cache feature means repeated generations get even cheaper (2.8¢ vs 28¢ per 1M tokens)
+Then rebuild:
+```bash
+npm run build
+```
 
 ---
 
-## Future Models
+## API Key
 
-The plugin is designed to easily add new models. As new versions are released (GPT-5.3, Claude Opus-5, etc.), we'll update this plugin to support them.
+Get your Anthropic API key:
+- **Console:** https://console.anthropic.com/settings/keys
+- **Pricing:** https://www.anthropic.com/pricing
 
-**Stay updated:** Check this file periodically or watch the GitHub repo for updates.
+---
+
+## Pricing (as of March 2026)
+
+| Model | Input | Output |
+|-------|-------|--------|
+| **Sonnet 4** | $3/1M tokens | $15/1M tokens |
+| **Opus 4** | $15/1M tokens | $75/1M tokens |
+| **Haiku 4** | $0.25/1M tokens | $1.25/1M tokens |
+
+**Typical cost for 1 Design System:**
+- Sonnet 4: ~$0.30-0.50
+- Opus 4: ~$1.50-2.00
+- Haiku 4: ~$0.05-0.10
+
+---
+
+## Tips
+
+1. **Start with Sonnet** - Best balance of quality and cost
+2. **Use Opus** for production-ready, polished systems
+3. **Use Haiku** for rapid prototyping and testing
+4. Monitor usage in Anthropic Console
+
+---
+
+## Future Support
+
+The plugin can support other providers (OpenAI, etc.) but currently focuses on Anthropic Claude for simplicity and quality.
+
+To add multi-provider support, modify the API call logic in `src/code.ts`.
+
+---
+
+**Current recommendation: Stick with Sonnet 4** ✅
