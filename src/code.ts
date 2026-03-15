@@ -1816,8 +1816,20 @@ async function generateScreen(prompt: string, apiKey: string, provider: 'anthrop
     // Extract design tokens if a design system is selected
     let designSystemContext = '';
     if (designSystemName) {
+      console.log('Extracting tokens from design system:', designSystemName);
       const tokens = await extractDesignTokens(designSystemName);
+      console.log('Tokens extracted:', tokens);
       if (tokens) {
+        const primaryColor = tokens.colors.primary['500'];
+        const secondaryColor = tokens.colors.secondary['500'];
+        const hasColors = primaryColor || secondaryColor;
+        
+        if (hasColors) {
+          figma.ui.postMessage({ type: 'loading', message: `Using design system: ${designSystemName} (Primary: ${primaryColor || 'default'})` });
+        } else {
+          figma.ui.postMessage({ type: 'loading', message: `Design system "${designSystemName}" loaded but no colors found. Using defaults.` });
+        }
+        
         const bgColor = (tokens.darkMode && tokens.darkMode.background) || '#FFFFFF';
         designSystemContext = `
 USE THIS DESIGN SYSTEM:
@@ -2533,31 +2545,52 @@ async function extractDesignTokens(pageName: string): Promise<DesignTokens | nul
     }
   };
   
-  // Scan frames in the page to extract colors
-  page.children.forEach(node => {
-    if (node.type === 'FRAME' && node.name.toLowerCase().includes('color')) {
-      // Extract colors from color palette frames
-      node.children.forEach(child => {
-        if (child.type === 'RECTANGLE' && 'fills' in child) {
-          const fills = child.fills as readonly Paint[];
-          if (fills.length > 0 && fills[0].type === 'SOLID') {
-            const color = fills[0].color;
-            const hex = rgbToHex(color.r, color.g, color.b);
-            
-            // Categorize based on name
-            const name = child.name.toLowerCase();
-            if (name.includes('primary')) {
-              tokens.colors.primary['500'] = hex;
-            } else if (name.includes('secondary')) {
-              tokens.colors.secondary['500'] = hex;
-            } else if (name.includes('neutral')) {
-              tokens.colors.neutral['500'] = hex;
-            }
-          }
+  // Helper to extract color from any node with fills
+  const extractColorFromNode = (node: SceneNode, nodeName: string) => {
+    if ('fills' in node && node.fills && Array.isArray(node.fills) && node.fills.length > 0) {
+      const fill = node.fills[0];
+      if (fill.type === 'SOLID') {
+        const hex = rgbToHex(fill.color.r, fill.color.g, fill.color.b);
+        const name = nodeName.toLowerCase();
+        
+        if (name.includes('primary') || name.includes('brand') || name.includes('main')) {
+          tokens.colors.primary['500'] = hex;
+        } else if (name.includes('secondary') || name.includes('accent')) {
+          tokens.colors.secondary['500'] = hex;
+        } else if (name.includes('neutral') || name.includes('gray') || name.includes('grey')) {
+          tokens.colors.neutral['500'] = hex;
+        } else if (name.includes('background') || name.includes('bg')) {
+          tokens.darkMode.background = hex;
+        } else if (name.includes('surface') || name.includes('card')) {
+          tokens.darkMode.surface = hex;
+        } else if (name.includes('error') || name.includes('danger') || name.includes('red')) {
+          tokens.colors.semantic['error'] = hex;
+        } else if (name.includes('success') || name.includes('green')) {
+          tokens.colors.semantic['success'] = hex;
+        } else if (name.includes('warning') || name.includes('yellow') || name.includes('orange')) {
+          tokens.colors.semantic['warning'] = hex;
         }
-      });
+      }
     }
+  };
+
+  // Recursive function to scan all nodes
+  const scanNode = (node: SceneNode) => {
+    extractColorFromNode(node, node.name);
+    
+    // Also check if it's a component/frame with children
+    if ('children' in node && node.children) {
+      node.children.forEach(child => scanNode(child));
+    }
+  };
+
+  // Scan all top-level nodes in the page
+  page.children.forEach(node => {
+    scanNode(node);
   });
+
+  // Log what was extracted for debugging
+  console.log('Extracted tokens:', JSON.stringify(tokens, null, 2));
   
   return tokens;
 }
