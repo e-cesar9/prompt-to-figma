@@ -1816,7 +1816,7 @@ async function generateScreen(prompt: string, apiKey: string, provider: 'anthrop
     // Extract design tokens if a design system is selected
     let designSystemContext = '';
     if (designSystemName) {
-      const tokens = extractDesignTokens(designSystemName);
+      const tokens = await extractDesignTokens(designSystemName);
       if (tokens) {
         const bgColor = (tokens.darkMode && tokens.darkMode.background) || '#FFFFFF';
         designSystemContext = `
@@ -2504,9 +2504,12 @@ function getAvailableDesignSystems(): Array<{name: string}> {
 // EXTRACT TOKENS FROM DESIGN SYSTEM PAGE
 // ========================================
 
-function extractDesignTokens(pageName: string): DesignTokens | null {
+async function extractDesignTokens(pageName: string): Promise<DesignTokens | null> {
   const page = figma.root.children.find(p => p.name === pageName);
   if (!page) return null;
+  
+  // Load page before accessing children (required by Figma API)
+  await page.loadAsync();
   
   const tokens: DesignTokens = {
     colors: {
